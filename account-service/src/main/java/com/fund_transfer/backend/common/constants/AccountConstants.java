@@ -1,5 +1,7 @@
 package com.fund_transfer.backend.common.constants;
 
+import java.math.BigDecimal;
+
 public final class AccountConstants {
 
     private AccountConstants() {
@@ -9,11 +11,16 @@ public final class AccountConstants {
     // Default Account Configurations
     public static final String DEFAULT_CURRENCY = "INR";
     public static final String DEFAULT_BRANCH_CODE = "001";
+    public static final String DEFAULT_BRANCH_NAME = "Main Metro Branch";
     public static final String DEFAULT_IFSC_PREFIX = "BHRT000";
+    public static final String DEFAULT_MICR_CODE = "110002001";
+    public static final BigDecimal DEFAULT_INTEREST_RATE = new BigDecimal("4.50");
+    public static final BigDecimal INITIAL_BALANCE_ZERO = new BigDecimal("0.00");
 
     // Account Number Generation & Validation
     public static final int ACCOUNT_NUMBER_LENGTH = 12;
     public static final String ACCOUNT_NUMBER_REGEX = "^[0-9]{10,16}$";
+    public static final int DEFAULT_MINI_STATEMENT_COUNT = 5;
 
     // HTTP Headers
     public static final String HEADER_CUSTOMER_ID = "X-Customer-Id";
@@ -25,4 +32,6 @@ public final class AccountConstants {
     public static final String ERR_ACCOUNT_ALREADY_EXISTS = "Account already exists with account number: ";
     public static final String ERR_INVALID_STATUS_TRANSITION = "Invalid account status transition from %s to %s";
     public static final String ERR_INSUFFICIENT_FUNDS = "Insufficient balance in account: ";
+    public static final String ERR_CUSTOMER_ID_REQUIRED = "Customer ID (CIF) is required and could not be resolved from token";
+    public static final String ERR_ACCOUNT_NUMBER_REQUIRED = "Account number is required";
 }
