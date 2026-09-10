@@ -1,26 +1,28 @@
-import com.fund_transfer.backend.dto.Request.InitiateTransferRequest;
+package com.fund_transfer.backend.service;
+
+import com.fund_transfer.backend.dto.Request.TransferRequest;
 import com.fund_transfer.backend.dto.Response.TransactionResponse;
 import com.fund_transfer.backend.entity.Transaction;
 import com.fund_transfer.backend.enums.TransactionStatus;
 import com.fund_transfer.backend.dto.Mapper.TransactionMapper;
 import com.fund_transfer.backend.repository.TransactionRepo;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.UUID;
 
 @Service
-public class FundTransferService {
+@RequiredArgsConstructor
+public class TransactionService {
 
     private final TransactionRepo transactionRepo;
     private final TransactionMapper transactionMapper;
 
-    public FundTransferService(TransactionRepo transactionRepo, TransactionMapper transactionMapper) {
-        this.transactionRepo = transactionRepo;
-        this.transactionMapper = transactionMapper;
-    }
 
-    public TransactionResponse initiateTransfer(InitiateTransferRequest request) {
+
+    public TransactionResponse processTransfer(TransferRequest request) {
         Transaction transaction = Transaction.builder()
                 .id(UUID.randomUUID())
                 .transactionReference(UUID.randomUUID().toString())

@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Positive;
 import java.math.BigInteger;
 import java.util.UUID;
 
-public record InitiateTransferRequest(
+public record TransferRequest(
 
         String idempotencyKey,
 
