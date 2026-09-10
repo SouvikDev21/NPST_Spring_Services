@@ -23,7 +23,8 @@ public class BeneficiaryMapper {
                 beneficiary.getTransferMode(),
                 beneficiary.getStatus(),
                 beneficiary.getType(),
-                beneficiary.getCoolingPeriodEndsAt()
+                beneficiary.getCoolingPeriodEndsAt(),
+                beneficiary.getDailyLimitMinorUnits()
         );
     }
 }

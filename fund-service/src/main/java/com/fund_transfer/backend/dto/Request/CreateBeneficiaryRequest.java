@@ -5,21 +5,23 @@ import com.fund_transfer.backend.enums.TransferMode;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
-import java.math.BigInteger;
-
+/**
+ * SECURITY FIX: ownerCif and ownerKeycloakUserId were removed from this DTO.
+ * They must NEVER be client-suppliable — a client could otherwise create a
+ * beneficiary against another customer's CIF (IDOR). The controller resolves
+ * both values from the authenticated security principal instead and passes
+ * them into the service layer separately from this request body.
+ */
 public record CreateBeneficiaryRequest(
 
         @NotBlank
-        String ownerCif,
-
-        @NotBlank
-        String ownerKeycloakUserId,
-
-        @NotBlank
+        @Size(max = 100)
         String beneficiaryName,
 
         @NotBlank
+        @Pattern(regexp = "^[0-9]{9,30}$", message = "beneficiaryAccountNumber must be 9-30 digits")
         String beneficiaryAccountNumber,
 
         @NotBlank
@@ -29,6 +31,7 @@ public record CreateBeneficiaryRequest(
         )
         String beneficiaryIfscCode,
 
+        @Size(max = 50)
         String nickname,
 
         @NotNull
@@ -36,7 +39,6 @@ public record CreateBeneficiaryRequest(
 
         @NotNull
         BeneficiaryType type
-
 
 ) {
 }
