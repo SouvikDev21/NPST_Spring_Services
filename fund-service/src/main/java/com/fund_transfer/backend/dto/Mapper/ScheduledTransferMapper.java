@@ -7,7 +7,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class ScheduledTransferMapper {
 
-    public ScheduledTransferResponse toResponse(ScheduledTransfer scheduledTransfer) {
+    public ScheduledTransferResponse toResponse(
+            ScheduledTransfer scheduledTransfer) {
 
         if (scheduledTransfer == null) {
             return null;
@@ -16,6 +17,7 @@ public class ScheduledTransferMapper {
         return new ScheduledTransferResponse(
                 scheduledTransfer.getId(),
                 scheduledTransfer.getCif(),
+                scheduledTransfer.getKeycloakUserId(),
                 scheduledTransfer.getBeneficiaryId(),
                 scheduledTransfer.getAmountMinorUnits(),
                 scheduledTransfer.getTransferMode(),
@@ -27,6 +29,7 @@ public class ScheduledTransferMapper {
                 scheduledTransfer.getLastExecutedAt(),
                 scheduledTransfer.getRetryCount(),
                 scheduledTransfer.getMaxRetries(),
+                scheduledTransfer.getVersion(),
                 scheduledTransfer.getCreatedAt(),
                 scheduledTransfer.getUpdatedAt()
         );

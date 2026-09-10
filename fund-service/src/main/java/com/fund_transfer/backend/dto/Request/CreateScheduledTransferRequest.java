@@ -14,7 +14,7 @@ import java.util.UUID;
 public record CreateScheduledTransferRequest(
 
         @NotNull
-        UUID beneficiaryId,
+        Long beneficiaryId,
 
         @NotNull
         @Positive
@@ -30,13 +30,9 @@ public record CreateScheduledTransferRequest(
         @FutureOrPresent
         LocalDate nextExecutionDate,
 
-        @PositiveOrZero
-        Integer maxRetries,
+        LocalDate endDate
 
-        @FutureOrPresent
-        LocalDate endDate,
 
-        String remarks
 ) {
     @AssertTrue(message = "endDate must be null or on/after nextExecutionDate")
     public boolean isEndDateValid() {
