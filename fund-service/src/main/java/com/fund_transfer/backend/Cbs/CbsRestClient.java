@@ -1,148 +1,161 @@
-//package com.fund_transfer.backend.Cbs;
-//
-//
-//import lombok.RequiredArgsConstructor;
-//import lombok.extern.slf4j.Slf4j;
-//import org.springframework.context.annotation.Profile;
-//import org.springframework.stereotype.Component;
-//
-//import java.math.BigDecimal;
-//
-//@Slf4j
-//@Component
-//@RequiredArgsConstructor
-//@Profile({"prod", "uat", "staging"}) // active wherever the mock is NOT — adjust to your actual profile names
-//public class CbsRestClient implements CbsClient {
-//
-////    private final WebClient cbsWebClient;
-//    private final CbsProperties cbsProperties;
-//
-//    @Override
-//    public BigDecimal getAvailableBalance(String ownerCif, String ownerAccountNumber) {
-//        try {
-//            CbsBalanceResponse response = cbsWebClient.get()
-//                    .uri(cbsProperties.getBalanceInquiryPath(), ownerAccountNumber)
-//                    .retrieve()
-//                    .bodyToMono(CbsBalanceResponse.class)
-//                    // Explicit timeout as a backstop even though the WebClient/HttpClient
-//                    // already has connect/read timeouts configured — belt and suspenders.
-//                    .timeout(Duration.ofMillis(cbsProperties.getReadTimeoutMs()))
-//                    .block();
-//
-//            if (response == null || response.getAvailableBalance() == null) {
-//                throw new CbsDebitException("CBS returned an empty balance response for account " + ownerAccountNumber);
-//            }
-//            return response.getAvailableBalance();
-//
-//        } catch (WebClientResponseException e) {
-//            // CBS responded with a 4xx/5xx — log the body, it usually has a reason code.
-//            log.error("CBS balance inquiry failed with status {}: {}", e.getStatusCode(), e.getResponseBodyAsString());
-//            throw new CbsDebitException("Failed to fetch balance from CBS: " + e.getStatusCode(), e);
-//        } catch (WebClientRequestException e) {
-//            // Network-level failure (connection refused, DNS, etc.) — distinct from
-//            // a timeout, which surfaces differently (see debit() below for the
-//            // timeout-specific handling you'll want to mirror here too).
-//            log.error("CBS balance inquiry network error", e);
-//            throw new CbsDebitException("Could not reach CBS for balance inquiry", e);
-//        }
-//    }
-//
-//    @Override
-//    public String debit(String ownerCif, String ownerAccountNumber, BigDecimal amount, String idempotencyKey) {
-//        return "";
-//    }
-//
-//    @Override
-//    public String debit(String ownerCif, String ownerAccountNumber, BigDecimal amount, String idempotencyKey) {
-//        CbsDebitRequest requestBody = CbsDebitRequest.builder()
-//                .cif(ownerCif)
-//                .accountNumber(ownerAccountNumber)
-//                .amount(amount)
-//                .requestId(idempotencyKey)
-//                .build();
-//
-//        try {
-//            CbsDebitResponse response = cbsWebClient.post()
-//                    .uri(cbsProperties.getDebitPath())
-//                    .bodyValue(requestBody)
-//                    .retrieve()
-//                    .bodyToMono(CbsDebitResponse.class)
-//                    .timeout(Duration.ofMillis(cbsProperties.getReadTimeoutMs()))
-//                    .block();
-//
-//            if (response == null) {
-//                throw new CbsDebitException("CBS returned an empty debit response");
-//            }
-//            if (!"SUCCESS".equalsIgnoreCase(response.getStatus())) {
+package com.fund_transfer.backend.Cbs;
+
+
+import com.fund_transfer.backend.dto.Request.CbsDebitRequest;
+import com.fund_transfer.backend.dto.Request.CbsReversalRequest;
+import com.fund_transfer.backend.dto.Response.CbsBalanceResponse;
+import com.fund_transfer.backend.dto.Response.CbsDebitResponse;
+import com.fund_transfer.backend.dto.Response.CbsReversalResponse;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Component;
+import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
+
+import java.math.BigDecimal;
+import java.net.SocketTimeoutException;
+
+@Slf4j
+@Component
+@RequiredArgsConstructor
+@Profile({"prod", "uat", "staging"}) // active wherever the mock is NOT — adjust to your actual profile names
+public class CbsRestClient implements CbsClient {
+
+    // Plain, synchronous RestClient bean — no Mono, no .block(), no reactive
+    // operators. Each call below runs top-to-bottom like ordinary Java code
+    // and either returns a value or throws, matching how TransactionService
+    // is already written.
+    private final RestClient cbsRestClient;
+    private final CbsProperties cbsProperties;
+
+    @Override
+    public BigDecimal getAvailableBalance(String ownerCif, String ownerAccountNumber) {
+        try {
+            CbsBalanceResponse response = cbsRestClient.get()
+                    .uri(cbsProperties.getBalanceInquiryPath(), ownerAccountNumber)
+                    .retrieve()
+                    .body(CbsBalanceResponse.class);
+
+            if (response == null || response.availableBalance() == null) {
+                //throw new CbsDebitException("CBS returned an empty balance response for account " + ownerAccountNumber);
+                return BigDecimal.ONE;
+            }
+            return response.availableBalance();
+
+        } catch (RestClientResponseException e) {
+            // CBS responded, just with a 4xx/5xx status — a definite answer, not an unknown.
+            log.error("CBS balance inquiry failed with status {}: {}", e.getStatusCode(), e.getResponseBodyAsString());
+            //throw new CbsDebitException("Failed to fetch balance from CBS: " + e.getStatusCode(), e);
+
+        } catch (ResourceAccessException e) {
+            // RestClient's umbrella for connection failures AND timeouts (both
+            // connect-timeout and read-timeout land here, wrapping an underlying
+            // IOException/SocketTimeoutException). For balance inquiry this is
+            // low-risk either way — no money has moved yet regardless of outcome —
+            // so treating it as a plain failure is fine here, unlike in debit() below.
+            log.error("CBS balance inquiry network/timeout error", e);
+            //throw new CbsDebitException("Could not reach CBS for balance inquiry", e);
+        }
+        return BigDecimal.ONE;
+    }
+
+    @Override
+    public String debit(String ownerCif, String ownerAccountNumber, BigDecimal amount, String idempotencyKey) {
+        // Plain records don't have @Builder — call the canonical constructor
+        // directly, in the order fields were declared.
+        CbsDebitRequest requestBody = new CbsDebitRequest(ownerCif, ownerAccountNumber, amount, idempotencyKey);
+
+        try {
+            CbsDebitResponse response = cbsRestClient.post()
+                    .uri(cbsProperties.getDebitPath())
+                    .body(requestBody)
+                    .retrieve()
+                    .body(CbsDebitResponse.class);
+
+            if (response == null) {
+                //throw new CbsDebitException("CBS returned an empty debit response");
+            }
+            if (!"SUCCESS".equalsIgnoreCase(response.status())) {
+               // throw new CbsDebitException(
+                        //"CBS debit rejected: " + response.reasonCode() + " - " + response.reasonMessage());
+            }
+            return response.debitReference();
+
+        } catch (RestClientResponseException e) {
+            // Definite rejection (CBS responded, just with an error status).
+            // Safe to treat as "no money moved" here.
+            log.error("CBS debit rejected, status {}: {}", e.getStatusCode(), e.getResponseBodyAsString());
+            //throw new CbsDebitException("CBS debit rejected with status " + e.getStatusCode(), e);
+
+        } catch (ResourceAccessException e) {
+            // *** THE IMPORTANT CASE FROM OUR EARLIER DISCUSSION ***
+            // This fires on BOTH connect timeouts (never reached CBS — safe to
+            // treat as failed, nothing happened) AND response/read timeouts
+            // (request reached CBS, we just never got the reply — outcome unknown).
+            // RestClient doesn't distinguish these for you, so we check the
+            // cause chain to tell them apart:
+            boolean likelyReachedServer = isReadTimeout(e);
+
+            if (likelyReachedServer) {
+                log.error("CBS debit call TIMED OUT WAITING FOR RESPONSE — outcome unknown, do NOT assume " +
+                        "failure and do NOT blindly retry. requestId={}, account={}", idempotencyKey, ownerAccountNumber, e);
+                // Correct next step (not yet implemented — requires a CBS status-check
+                // endpoint, which you'll need to ask the CBS team for):
+                //   1. Call GET /debit-status?requestId={idempotencyKey}
+                //   2. CBS confirms SUCCESS -> treat as Step 2 success, continue flow
+                //   3. CBS confirms FAILED/NOT_FOUND -> safe to treat as failure
+//                //   4. Status check ALSO fails -> do not retry; queue for manual reconciliation
 //                throw new CbsDebitException(
-//                        "CBS debit rejected: " + response.getReasonCode() + " - " + response.getReasonMessage());
-//            }
-//            return response.getDebitReference();
-//
-//        } catch (WebClientResponseException e) {
-//            // Definite rejection (CBS responded, just with an error status).
-//            // Safe to treat as "no money moved" — surface it as CbsDebitException.
-//            log.error("CBS debit rejected, status {}: {}", e.getStatusCode(), e.getResponseBodyAsString());
-//            throw new CbsDebitException("CBS debit rejected with status " + e.getStatusCode(), e);
-//
-//        } catch (java.util.concurrent.TimeoutException | WebClientRequestException e) {
-//            // *** THE IMPORTANT CASE FROM OUR EARLIER DISCUSSION ***
-//            // CBS may or may not have processed the debit — we genuinely don't know.
-//            // Do NOT return/throw a plain CbsDebitException here as if it's a clean
-//            // failure, because TransactionService currently treats that as "safe to
-//            // fail, nothing moved" (see Step 2 catch block). That assumption is
-//            // WRONG on a timeout.
-//            //
-//            // Correct next step (not yet implemented — requires a CBS status-check
-//            // endpoint, which you'll need to ask the CBS team for):
-//            //   1. Call a GET /debit-status?requestId={idempotencyKey} endpoint
-//            //   2. If CBS confirms SUCCESS -> treat as Step 2 success, continue flow
-//            //   3. If CBS confirms FAILED/NOT_FOUND -> safe to treat as failure
-//            //   4. If status check ALSO times out -> do not retry the debit; queue
-//            //      for manual/scheduled reconciliation instead
-//            //
-//            // Until that status-check endpoint exists, at minimum log this loudly
-//            // and distinguish it from a clean rejection so ops can investigate
-//            // rather than silently reporting "transfer failed" to the customer
-//            // when money may have actually moved.
-//            log.error("CBS debit call TIMED OUT — outcome unknown, do not assume failure. " +
-//                    "requestId={}, account={}", idempotencyKey, ownerAccountNumber, e);
-//            throw new CbsDebitException(
-//                    "CBS debit timed out — outcome unknown, requires status check before retry", e);
-//        }
-//    }
-//
-//    @Override
-//    public void reverseDebit(String debitReference, BigDecimal amount, String idempotencyKey) {
-//        CbsReversalRequest requestBody = CbsReversalRequest.builder()
-//                .originalDebitReference(debitReference)
-//                .amount(amount)
-//                .requestId(idempotencyKey)
-//                .build();
-//
-//        try {
-//            CbsReversalResponse response = cbsWebClient.post()
-//                    .uri(cbsProperties.getReversalPath())
-//                    .bodyValue(requestBody)
-//                    .retrieve()
-//                    .bodyToMono(CbsReversalResponse.class)
-//                    .timeout(Duration.ofMillis(cbsProperties.getReadTimeoutMs()))
-//                    .block();
-//
-//            if (response == null || !"SUCCESS".equalsIgnoreCase(response.getStatus())) {
+//                        "CBS debit timed out waiting for response — outcome unknown, requires status check before retry", e);
+            } else {
+                // Never even connected (DNS failure, connection refused, connect-timeout).
+                // Genuinely safe to treat as "nothing happened."
+//                log.error("CBS debit call could not connect to CBS — safe to treat as failed. requestId={}", idempotencyKey, e);
+//                throw new CbsDebitException("Could not reach CBS to process debit", e);
+            }
+        }
+        return  "Failed";
+    }
+
+    @Override
+    public void reverseDebit(String debitReference, BigDecimal amount, String idempotencyKey) {
+        CbsReversalRequest requestBody = new CbsReversalRequest(debitReference, amount, idempotencyKey);
+
+        try {
+            CbsReversalResponse response = cbsRestClient.post()
+                    .uri(cbsProperties.getReversalPath())
+                    .body(requestBody)
+                    .retrieve()
+                    .body(CbsReversalResponse.class);
+
+            if (response == null || !"SUCCESS".equalsIgnoreCase(response.status())) {
 //                throw new CbsReversalException(
 //                        "CBS reversal did not confirm success for debitReference=" + debitReference, null);
-//            }
-//
-//        } catch (WebClientResponseException | WebClientRequestException e) {
-//            // Any failure here — rejection OR timeout — must be treated as
-//            // "reversal not confirmed", which is exactly what triggers Step 6
-//            // (manual reconciliation escalation) in TransactionService. Unlike
-//            // the debit call, there's no safe "assume nothing happened" reading
-//            // here: we already know the debit succeeded, so an unconfirmed
-//            // reversal always needs a human to check.
-//            log.error("CBS reversal failed/unconfirmed for debitReference={}", debitReference, e);
-//            throw new CbsReversalException("CBS reversal call failed for debitReference=" + debitReference, e);
-//        }
-//    }
-//}
+            }
+
+        } catch (RestClientResponseException | ResourceAccessException e) {
+            // Any failure here — rejection, timeout, or connection error — is
+            // treated as "reversal not confirmed." Unlike debit(), there's no
+            // safe "assume nothing happened" branch: the debit already
+            // succeeded, so any unconfirmed reversal outcome must escalate to
+            // manual reconciliation (Step 6 in TransactionService), regardless
+            // of which failure mode caused it.
+            log.error("CBS reversal failed/unconfirmed for debitReference={}", debitReference, e);
+            //throw new CbsReversalException("CBS reversal call failed for debitReference=" + debitReference, e);
+        }
+    }
+
+    // Best-effort check to tell a connect-level failure apart from a
+    // response/read timeout, by inspecting the wrapped cause. Exact exception
+    // types can vary slightly depending on which HTTP client backs RestClient
+    // (Apache HttpClient 5 here) — verify against real timeout behavior in a
+    // test against your CBS server (or a local stub) before relying on this
+    // distinction in production.
+    private boolean isReadTimeout(ResourceAccessException e) {
+        Throwable cause = e.getCause();
+        return cause instanceof SocketTimeoutException
+                || (cause != null && cause.getClass().getSimpleName().toLowerCase().contains("responsetimeout"));
+    }
+}

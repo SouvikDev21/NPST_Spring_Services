@@ -2,10 +2,13 @@ package com.fund_transfer.backend.dto.Response;
 
 import com.fund_transfer.backend.enums.TransactionStatus;
 import com.fund_transfer.backend.enums.TransferMode;
+import lombok.Builder;
+
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
 import java.util.UUID;
-
+@Builder
 public record TransactionResponse(
         UUID id,
         String transactionReference,
@@ -16,7 +19,7 @@ public record TransactionResponse(
         UUID beneficiaryId,
         String destinationAccountNumber,
         String destinationIfscCode,
-        BigInteger amountMinorUnits,
+        BigDecimal amountMinorUnits,
         String currency,
         TransferMode transferMode,
         TransactionStatus status,
@@ -28,4 +31,6 @@ public record TransactionResponse(
         Instant completedAt,
         Instant createdAt,
         Instant updatedAt
-) {}
+) {
+
+}

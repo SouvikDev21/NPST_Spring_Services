@@ -4,16 +4,37 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="fc54abec-f6cd-49fa-8c4b-1ba8fde20984" name="Changes" comment="made the fund transfer feature">
-      <change afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/Cbs/CbsClient.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/Cbs/CbsClientConfig.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/Cbs/CbsProperties.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/Cbs/CbsRestClient.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/controller/TransferMoneyController.java" afterDir="false" />
+    <list default="true" id="fc54abec-f6cd-49fa-8c4b-1ba8fde20984" name="Changes" comment="Merge remote-tracking branch 'origin/main'">
+      <change afterPath="$PROJECT_DIR$/.idea/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/NPST_Spring_Services.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/Npci/MockNpciClient.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/Npci/NpciClient.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/controller/FundTransferController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/dto/Request/CbsDebitRequest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/dto/Request/CbsReversalRequest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/dto/Response/CbsBalanceResponse.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/dto/Response/CbsDebitResponse.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/dto/Response/CbsReversalResponse.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/exception/CbsDebitException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/exception/CbsReversalException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/exception/InsufficientBalanceException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/fund-service/src/main/java/exceptionHandler/ErrorResponse.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/fund-service/src/main/java/exceptionHandler/GlobalExceptionHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fund-service/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/controller/FundTransferController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/dto/Request/InitiateTransferRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/dto/Request/TransferRequest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/service/FundTransferService.java" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/service/TransactionService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/Cbs/CbsClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/Cbs/CbsClient.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/Cbs/CbsClientConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/Cbs/CbsClientConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/Cbs/CbsProperties.java" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/Cbs/CbsProperties.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/Cbs/CbsRestClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/Cbs/CbsRestClient.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/dto/Request/TransferRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/dto/Request/TransferRequest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/dto/Response/TransactionResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/dto/Response/TransactionResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/enums/TransactionStatus.java" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/enums/TransactionStatus.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/service/TransactionService.java" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/service/TransactionService.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -61,61 +82,61 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.60936781669513" />
-      <entry key="MS500" value="3.5525737500667076" />
-      <entry key="S2" value="6.868645781817122" />
-      <entry key="S5" value="10.037846175387285" />
-      <entry key="S10" value="12.178738360319608" />
-      <entry key="S30" value="18.75718820760573" />
-      <entry key="S60" value="24.602932721293637" />
-      <entry key="M2" value="29.611975996488" />
-      <entry key="M5" value="34.007074717465954" />
-      <entry key="M10" value="36.59334557539764" />
-      <entry key="M15" value="39.96909351306105" />
-      <entry key="M30" value="56.34318188206215" />
-      <entry key="H1" value="91.9896577375963" />
-      <entry key="H2" value="138.3336585297397" />
-      <entry key="H4" value="180.22144579985735" />
-      <entry key="D1" value="306.46674280622375" />
-      <entry key="W1" value="401.80539473589096" />
+      <entry key="MS100" value="1.0000000000000007" />
+      <entry key="MS500" value="1.0009367813665286" />
+      <entry key="S2" value="1.1749482331993994" />
+      <entry key="S5" value="1.497924876547229" />
+      <entry key="S10" value="1.705637921704347" />
+      <entry key="S30" value="1.890349507733884" />
+      <entry key="S60" value="1.9904259047774246" />
+      <entry key="M2" value="3.263955803420048" />
+      <entry key="M5" value="11.70622259062125" />
+      <entry key="M10" value="21.555651537279456" />
+      <entry key="M15" value="28.32245529859776" />
+      <entry key="M30" value="47.725233645596326" />
+      <entry key="H1" value="84.87058439464134" />
+      <entry key="H2" value="133.2984191996383" />
+      <entry key="H4" value="177.5789665567744" />
+      <entry key="D1" value="307.1366670008798" />
+      <entry key="W1" value="403.5558106952599" />
     </decayedCancelled>
     <decayedSelected>
-      <entry key="MS100" value="6.356941619939588E-51" />
-      <entry key="MS500" value="9.133761025694565E-11" />
-      <entry key="S2" value="0.003091451312495521" />
-      <entry key="S5" value="0.09909801707628561" />
-      <entry key="S10" value="0.3147983753777313" />
-      <entry key="S30" value="0.6810029583199158" />
-      <entry key="S60" value="0.863207907482891" />
-      <entry key="M2" value="1.1853691656431602" />
-      <entry key="M5" value="1.876322150354169" />
-      <entry key="M10" value="2.622169598274332" />
-      <entry key="M15" value="3.685854655695122" />
-      <entry key="M30" value="7.81427944902398" />
-      <entry key="H1" value="14.009784380745952" />
-      <entry key="H2" value="19.78702781235738" />
-      <entry key="H4" value="24.108025106119747" />
-      <entry key="D1" value="42.789769731450775" />
-      <entry key="W1" value="58.2684124712944" />
+      <entry key="MS100" value="0.0" />
+      <entry key="MS500" value="0.0" />
+      <entry key="S2" value="7.759093253567209E-85" />
+      <entry key="S5" value="2.2694696990318002E-34" />
+      <entry key="S10" value="1.5064759209829584E-17" />
+      <entry key="S30" value="2.47243890731864E-6" />
+      <entry key="S60" value="0.0016447643926894183" />
+      <entry key="M2" value="0.0517425429291658" />
+      <entry key="M5" value="0.5361731507641991" />
+      <entry key="M10" value="1.4017146305431751" />
+      <entry key="M15" value="2.427750718786664" />
+      <entry key="M30" value="6.341936378991196" />
+      <entry key="H1" value="12.6211207766857" />
+      <entry key="H2" value="18.780787549404995" />
+      <entry key="H4" value="23.487038134686696" />
+      <entry key="D1" value="42.60406634896051" />
+      <entry key="W1" value="58.232219502973194" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.5397615954202015" />
-      <entry key="MS500" value="3.522120342608109" />
-      <entry key="S2" value="6.853007903997781" />
-      <entry key="S5" value="10.030981743850257" />
-      <entry key="S10" value="12.22294026998752" />
-      <entry key="S30" value="19.121273772451055" />
-      <entry key="S60" value="25.24309227545598" />
-      <entry key="M2" value="30.661773053648435" />
-      <entry key="M5" value="35.819923075928756" />
-      <entry key="M10" value="39.17922346478493" />
-      <entry key="M15" value="43.62525852186433" />
-      <entry key="M30" value="64.13086362942038" />
-      <entry key="H1" value="105.97708106589342" />
-      <entry key="H2" value="158.10528941528554" />
-      <entry key="H4" value="204.32020633074552" />
-      <entry key="D1" value="349.2538294220676" />
-      <entry key="W1" value="460.07328668805326" />
+      <entry key="MS100" value="0.7269862586601556" />
+      <entry key="MS500" value="0.939103767522889" />
+      <entry key="S2" value="1.156544391357586" />
+      <entry key="S5" value="1.4886088783317555" />
+      <entry key="S10" value="1.700354476626431" />
+      <entry key="S30" value="1.8884045034011296" />
+      <entry key="S60" value="1.9906458032282497" />
+      <entry key="M2" value="3.3092735827292272" />
+      <entry key="M5" value="12.224053153305254" />
+      <entry key="M10" value="22.937863439668792" />
+      <entry key="M15" value="30.730582012282785" />
+      <entry key="M30" value="54.045549542063966" />
+      <entry key="H1" value="97.4715434403345" />
+      <entry key="H2" value="152.0645842443037" />
+      <entry key="H4" value="201.05697447441793" />
+      <entry key="D1" value="349.73806116469893" />
+      <entry key="W1" value="461.78750990041675" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -127,39 +148,39 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Downloaded.Files.Path.Enabled&quot;: &quot;false&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;Repository.Attach.Annotations&quot;: &quot;false&quot;,
-    &quot;Repository.Attach.JavaDocs&quot;: &quot;false&quot;,
-    &quot;Repository.Attach.Sources&quot;: &quot;false&quot;,
-    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;Spring Boot.BackendApplication.executor&quot;: &quot;Run&quot;,
-    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
-    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;feat/fund__transfer&quot;,
-    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_directory_selection&quot;: &quot;/home/souvik-dey/Desktop/JavaBackend/fund-service/src/test/java&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/souvik-dey/Desktop/JavaBackend&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.jshint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.jshint&quot;: &quot;&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;MavenSettings&quot;,
-    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Downloaded.Files.Path.Enabled": "false",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Repository.Attach.Annotations": "false",
+    "Repository.Attach.JavaDocs": "false",
+    "Repository.Attach.Sources": "false",
+    "RunOnceActivity.MCP Project settings loaded": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "Spring Boot.BackendApplication.executor": "Run",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "git-widget-placeholder": "Cherry-picking in feat/fund__transfer",
+    "junie.onboarding.icon.badge.shown": "true",
+    "kotlin-language-version-configured": "true",
+    "last_directory_selection": "/home/souvik-dey/Desktop/JavaBackend/fund-service/src/test/java",
+    "last_opened_file_path": "/home/souvik-dey/Desktop/JavaBackend",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.jshint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.jshint": "",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Project",
+    "project.structure.proportion": "0.0",
+    "project.structure.side.proportion": "0.0",
+    "settings.editor.selected.configurable": "MavenSettings",
+    "to.speed.mode.migration.done": "true"
   }
-}</component>
+}]]></component>
   <component name="RunManager" selected="Spring Boot.BackendApplication">
     <configuration name="BackendApplication (1)" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
       <module name="backend (1)" />
@@ -199,6 +220,9 @@
         <option value="bundled-js-predefined-d6986cc7102b-4abd2a77f808-JavaScript-IU-262.9437.185" />
       </set>
     </attachedChunks>
+  </component>
+  <component name="StructureViewState">
+    <option name="selectedTab" value="Physical" />
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">

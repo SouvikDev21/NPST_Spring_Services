@@ -1,51 +1,68 @@
-//package com.fund_transfer.backend.Cbs;
-//
-//import io.netty.channel.ChannelOption;
-//import io.netty.handler.timeout.ReadTimeoutHandler;
-//import lombok.RequiredArgsConstructor;
-//import org.springframework.context.annotation.Bean;
-//import org.springframework.context.annotation.Configuration;
-//import org.springframework.http.client.reactive.ReactorClientHttpConnector;
-//import org.springframework.web.reactive.function.client.WebClient;
-//import reactor.netty.http.client.HttpClient;
-//
-//import java.util.concurrent.TimeUnit;
-//
-//@Configuration
-//@RequiredArgsConstructor
-//public class CbsClientConfig {
-//
-//    private final CbsProperties cbsProperties;
-//
-//    @Bean
-//    public WebClient cbsWebClient() {
-//        HttpClient httpClient = HttpClient.create()
-//                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, cbsProperties.getConnectTimeoutMs())
-//                .doOnConnected(conn -> conn.addHandlerLast(
-//                        new ReadTimeoutHandler(cbsProperties.getReadTimeoutMs(), TimeUnit.MILLISECONDS)));
-//
-//        WebClient.Builder builder = WebClient.builder()
-//                .baseUrl(cbsProperties.getBaseUrl())
-//                .clientConnector(new ReactorClientHttpConnector(httpClient));
-//
-//        // --- Auth wiring: uncomment whichever matches once confirmed ---
-//
-//        // Option A: static API key header
-//        if (cbsProperties.getApiKey() != null && !cbsProperties.getApiKey().isBlank()) {
-//            builder.defaultHeader(cbsProperties.getApiKeyHeaderName(), cbsProperties.getApiKey());
-//        }
-//
-//        // Option B: OAuth2 client-credentials — instead of the header above,
-//        // you'd typically add a ServerOAuth2AuthorizedClientExchangeFilterFunction
-//        // as a filter() on this builder, backed by a ClientRegistration built
-//        // from cbsProperties.oauthTokenUrl/clientId/clientSecret. Left out
-//        // until you confirm this is the auth mechanism, since it needs the
-//        // spring-security-oauth2-client dependency.
-//
-//        // Option C: mTLS — configured at the HttpClient/SslContext level, not
-//        // here. Ask CBS team whether client certs are required; if so, this
-//        // whole method needs an SslContextBuilder with your keystore/truststore.
-//
-//        return builder.build();
-//    }
-//}
+package com.fund_transfer.backend.Cbs;
+
+
+import lombok.RequiredArgsConstructor;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.util.Timeout;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.web.client.RestClient;
+
+@Configuration
+@RequiredArgsConstructor
+public class CbsClientConfig {
+
+    private final CbsProperties cbsProperties;
+
+    @Bean
+    public RestClient cbsRestClient() {
+        // RequestConfig carries the connect timeout; "response timeout" here
+        // is the Apache HttpClient 5 equivalent of what we called "read timeout"
+        // when this was WebClient — how long to wait for CBS to respond once
+        // the request has been sent.
+        RequestConfig requestConfig = RequestConfig.custom()
+                .setConnectTimeout(Timeout.ofMilliseconds(cbsProperties.getConnectTimeoutMs()))
+                .setResponseTimeout(Timeout.ofMilliseconds(cbsProperties.getReadTimeoutMs()))
+                .build();
+
+        var httpClient = HttpClients.custom()
+                .setDefaultRequestConfig(requestConfig)
+                .build();
+
+        HttpComponentsClientHttpRequestFactory requestFactory =
+                new HttpComponentsClientHttpRequestFactory(httpClient);
+
+        RestClient.Builder builder = RestClient.builder()
+                .baseUrl(cbsProperties.getBaseUrl())
+                .requestFactory(requestFactory);
+
+        // --- Auth wiring: uncomment/adjust whichever matches once confirmed ---
+
+        // Option A: static API key header — current default assumption
+        if (cbsProperties.getApiKey() != null && !cbsProperties.getApiKey().isBlank()) {
+            builder.defaultHeader(cbsProperties.getApiKeyHeaderName(), cbsProperties.getApiKey());
+        }
+
+        // Option B: OAuth2 client-credentials — RestClient doesn't have a
+        // built-in OAuth2 filter like WebClient's ServerOAuth2AuthorizedClientExchangeFilterFunction.
+        // Simplest approach: fetch/cache a token yourself (e.g. a small
+        // CbsTokenProvider bean using RestClient against cbs.oauth-token-url),
+        // then add it as a request interceptor here:
+        //   builder.requestInterceptor((request, body, execution) -> {
+        //       request.getHeaders().setBearerAuth(tokenProvider.getToken());
+        //       return execution.execute(request, body);
+        //   });
+
+        // Option C: mTLS — configure the underlying Apache HttpClient's
+        // SSLContext with your keystore/truststore instead of a header, e.g.
+        // HttpClients.custom().setConnectionManager(
+        //     PoolingHttpClientConnectionManagerBuilder.create()
+        //         .setSSLSocketFactory(SSLConnectionSocketFactoryBuilder.create()
+        //             .setSslContext(yourSslContext).build())
+        //         .build())
+
+        return builder.build();
+    }
+}
