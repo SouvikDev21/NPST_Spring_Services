@@ -3,7 +3,6 @@ package com.fund_transfer.backend.entity;
 
 import java.math.BigInteger;
 import java.time.Instant;
-import java.util.UUID;
 
 import com.fund_transfer.backend.enums.BeneficiaryStatus;
 import com.fund_transfer.backend.enums.BeneficiaryType;
@@ -79,7 +78,7 @@ public class Beneficiary {
     private BigInteger dailyLimitMinorUnits; // nullable — falls back to the bank/tenant default limit if unset
 
 //    @Column(name = "bank_code", nullable = false, length = 20)
-//    private String bankCode; // tenant discriminator
+//    private String bankCode; // tenant discriminator — confirm with team whether multi-tenant is in scope
 
     @Version
     private Long version; // a Checker blocking a beneficiary and the owner using it in-flight is a real race
@@ -91,4 +90,10 @@ public class Beneficiary {
     @LastModifiedDate
     @Column(name = "updated_at")
     private Instant updatedAt;
+
+    // NOTE: @Setter above generates setBeneficiaryAccountNumber()/setBeneficiaryIfscCode(),
+    // which would allow silent mutation of fields that should be immutable post-creation
+    // (see BeneficiaryService — service layer never calls these two setters after create()).
+    // Consider @Setter(AccessLevel.NONE) on those two fields specifically if Lombok supports
+    // per-field override in this codebase's Lombok version.
 }

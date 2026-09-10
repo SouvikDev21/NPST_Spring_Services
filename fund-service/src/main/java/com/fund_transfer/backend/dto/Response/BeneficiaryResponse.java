@@ -4,8 +4,8 @@ import com.fund_transfer.backend.enums.BeneficiaryStatus;
 import com.fund_transfer.backend.enums.BeneficiaryType;
 import com.fund_transfer.backend.enums.TransferMode;
 
+import java.math.BigInteger;
 import java.time.Instant;
-import java.util.UUID;
 
 public record BeneficiaryResponse(
         Long id,
@@ -18,6 +18,7 @@ public record BeneficiaryResponse(
         TransferMode transferMode,
         BeneficiaryStatus status,
         BeneficiaryType type,
-        Instant coolingPeriodEndsAt
+        Instant coolingPeriodEndsAt,
+        BigInteger dailyLimitMinorUnits
 ) {
 }
