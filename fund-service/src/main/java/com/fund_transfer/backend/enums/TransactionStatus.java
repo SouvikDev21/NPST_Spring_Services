@@ -6,5 +6,6 @@ public enum TransactionStatus {
     PROCESSING,
     SUCCESS,
     FAILED,
-    REVERSED
+    REVERSED,
+    NPCI_FAILED
 }
