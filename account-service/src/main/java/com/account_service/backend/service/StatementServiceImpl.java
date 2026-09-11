@@ -73,12 +73,9 @@ public class StatementServiceImpl implements StatementService {
                 size
         );
 
-        if (cbsStmtOpt.isPresent() && cbsStmtOpt.get().getTransactions() != null) {
+        if (cbsStmtOpt.isPresent()) {
             CbsStatementResponse cbs = cbsStmtOpt.get();
-            List<CbsStatementResponse.CbsTransactionRecord> records = new ArrayList<>();
-            cbs.getTransactions().values().forEach(records::addAll);
-
-            List<TransactionResponse> txns = records.stream()
+            List<TransactionResponse> txns = cbs.getTransactionList().stream()
                     .map(this::toTransactionResponse)
                     .toList();
 

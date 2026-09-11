@@ -1,0 +1,49 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: account-service
+  datasource:
+    url: jdbc:h2:mem:account_test_db;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=MySQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
+    show-sql: false
+  flyway:
+    enabled: false
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8080/realms/bharat-banking}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+
+cbs:
+  base-url: ${CBS_BASE_URL:http://localhost:8000}
+  channel-id: ${CBS_CHANNEL_ID:INTERNET_BANKING}
+  user-id: ${CBS_USER_ID:APIUSER}
+  branch-code: ${CBS_BRANCH_CODE:001}
+  connect-timeout-ms: 5000
+  read-timeout-ms: 10000
+
+keycloak:
+  url: ${KEYCLOAK_URL:http://localhost:8080}
+  realm: ${KEYCLOAK_REALM:bharat-banking}
+  issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8080/realms/bharat-banking}
+  client-id: ${KEYCLOAK_CLIENT_ID:admin-web}
+  client-secret: ${KEYCLOAK_CLIENT_SECRET:}
+  claim-cif-key: cif
+  clients:
+    admin-web: ${KEYCLOAK_CLIENT_ADMIN_WEB:admin-web}
+    mobile-app: ${KEYCLOAK_CLIENT_MOBILE_APP:mobile-app}

@@ -154,6 +154,16 @@ public class KeycloakAdapterImpl implements KeycloakAdapter {
                 return String.valueOf(val);
             }
         }
+        Object attributesObj = claims.get("attributes");
+        if (attributesObj instanceof Map<?, ?> attrMap) {
+            String key = (keycloakProperties != null && keycloakProperties.getClaimCifKey() != null) ? keycloakProperties.getClaimCifKey() : "cif";
+            Object val = attrMap.get(key);
+            if (val instanceof Collection<?> coll && !coll.isEmpty()) {
+                return String.valueOf(coll.iterator().next());
+            } else if (val != null) {
+                return String.valueOf(val);
+            }
+        }
         Object usernameObj = claims.get(KeycloakConstants.CLAIM_PREFERRED_USERNAME);
         if (usernameObj != null && String.valueOf(usernameObj).toUpperCase().startsWith("CIF")) {
             return String.valueOf(usernameObj);

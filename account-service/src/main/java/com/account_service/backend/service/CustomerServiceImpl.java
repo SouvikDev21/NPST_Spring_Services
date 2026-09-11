@@ -266,26 +266,22 @@ public class CustomerServiceImpl implements CustomerService {
         if (cbsResponseOpt.isPresent()) {
             List<CbsCustomerInquiryResponse.CbsAccountItem> accounts = extractCbsAccounts(cbsResponseOpt.get());
             for (CbsCustomerInquiryResponse.CbsAccountItem acc : accounts) {
-                if (acc.getJointHolders() != null) {
-                    acc.getJointHolders().values().forEach(list -> list.forEach(jh ->
-                            jointHolders.add(JointHolderDto.builder()
-                                    .customerId(jh.getCustomerId())
-                                    .name(jh.getName())
-                                    .relationship(jh.getRelationship())
-                                    .build())
-                    ));
-                }
-                if (acc.getNominees() != null) {
-                    acc.getNominees().values().forEach(list -> list.forEach(nom ->
-                            nominees.add(NomineeDto.builder()
-                                    .name(nom.getName())
-                                    .relation(nom.getRelation())
-                                    .sharePercentage(nom.getSharePercentage() != null ? nom.getSharePercentage() : 100)
-                                    .minor(false)
-                                    .guardianName(null)
-                                    .build())
-                    ));
-                }
+                acc.getJointHolderList().forEach(jh ->
+                        jointHolders.add(JointHolderDto.builder()
+                                .customerId(jh.getCustomerId())
+                                .name(jh.getName())
+                                .relationship(jh.getRelationship())
+                                .build())
+                );
+                acc.getNomineeList().forEach(nom ->
+                        nominees.add(NomineeDto.builder()
+                                .name(nom.getName())
+                                .relation(nom.getRelation())
+                                .sharePercentage(nom.getSharePercentage() != null ? nom.getSharePercentage() : 100)
+                                .minor(false)
+                                .guardianName(null)
+                                .build())
+                );
             }
         }
 
@@ -315,12 +311,10 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     private List<CbsCustomerInquiryResponse.CbsAccountItem> extractCbsAccounts(CbsCustomerInquiryResponse response) {
-        if (response == null || response.getAccounts() == null) {
+        if (response == null) {
             return Collections.emptyList();
         }
-        List<CbsCustomerInquiryResponse.CbsAccountItem> result = new ArrayList<>();
-        response.getAccounts().values().forEach(result::addAll);
-        return result;
+        return response.getAccountList();
     }
 
     private ProfileResponse toProfileResponse(CustomerProfile profile) {

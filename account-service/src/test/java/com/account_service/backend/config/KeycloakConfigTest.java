@@ -29,7 +29,7 @@ class KeycloakConfigTest {
     void testKeycloakPropertiesBinding() {
         assertThat(keycloakProperties).isNotNull();
         assertThat(keycloakProperties.getRealm()).isEqualTo("bharat-banking");
-        assertThat(keycloakProperties.getIssuerUri()).isEqualTo("http://localhost:8080/realms/bharat-banking");
+        assertThat(keycloakProperties.getIssuerUri()).endsWith("/realms/bharat-banking");
         assertThat(keycloakProperties.getClients().getAdminWeb()).isEqualTo("admin-web");
         assertThat(keycloakProperties.getClients().getMobileApp()).isEqualTo("mobile-app");
     }

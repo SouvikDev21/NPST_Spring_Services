@@ -1,31 +1,28 @@
 server:
-  port: 8081
+  port: ${SERVER_PORT:8081}
 
 spring:
   application:
     name: account-service
   datasource:
-    url: jdbc:h2:mem:account_db;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=MySQL
-    driver-class-name: org.h2.Driver
-    username: sa
-    password: ""
+    url: ${DB_URL:jdbc:mysql://${DB_HOST:103.209.145.243}:${DB_PORT:9100}/${DB_DATABASE:account_service}?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${DB_USERNAME:${DB_USER:rishi}}
+    password: ${DB_PASSWORD:irishcoffee}
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
+    database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
       ddl-auto: update
     open-in-view: false
-    show-sql: false
+    show-sql: ${DB_LOGGING:false}
   flyway:
     enabled: false
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${KEYCLOAK_ISSUER_URI}
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:${KEYCLOAK_AUTH_SERVER_URL:http://103.209.145.243:8201}/realms/${KEYCLOAK_REALM:bharat-banking}}
+          jwk-set-uri: ${KEYCLOAK_JWKS_URI:${KEYCLOAK_AUTH_SERVER_URL:http://103.209.145.243:8201}/realms/${KEYCLOAK_REALM:bharat-banking}/protocol/openid-connect/certs}
 
 management:
   endpoints:
@@ -38,20 +35,25 @@ springdoc:
     path: /swagger-ui.html
 
 cbs:
-  base-url: ${CBS_BASE_URL}
-  channel-id: ${CBS_CHANNEL_ID}
-  user-id: ${CBS_USER_ID}
-  branch-code: ${CBS_BRANCH_CODE}
-  connect-timeout-ms: 5000
-  read-timeout-ms: 10000
+  base-url: ${CBS_BASE_URL:http://103.209.145.243:9101/cbs/v3/}
+  channel-id: ${CBS_CHANNEL_ID:INTERNET_BANKING}
+  user-id: ${CBS_USER_ID:APIUSER}
+  branch-code: ${CBS_BRANCH_CODE:001}
+  connect-timeout-ms: ${CBS_CONNECT_TIMEOUT_MS:5000}
+  read-timeout-ms: ${CBS_READ_TIMEOUT_MS:10000}
 
 keycloak:
-  url: ${KEYCLOAK_URL}
-  realm: ${KEYCLOAK_REALM}
-  issuer-uri: ${KEYCLOAK_ISSUER_URI}
-  client-id: ${KEYCLOAK_CLIENT_ID}
-  client-secret: ${KEYCLOAK_CLIENT_SECRET}
-  claim-cif-key: cif
+  url: ${KEYCLOAK_AUTH_SERVER_URL:${KEYCLOAK_URL:http://103.209.145.243:8201}}
+  auth-server-url: ${KEYCLOAK_AUTH_SERVER_URL:http://103.209.145.243:8201}
+  realm: ${KEYCLOAK_REALM:bharat-banking}
+  issuer-uri: ${KEYCLOAK_ISSUER_URI:${KEYCLOAK_AUTH_SERVER_URL:http://103.209.145.243:8201}/realms/${KEYCLOAK_REALM:bharat-banking}}
+  jwk-set-uri: ${KEYCLOAK_JWKS_URI:${KEYCLOAK_AUTH_SERVER_URL:http://103.209.145.243:8201}/realms/${KEYCLOAK_REALM:bharat-banking}/protocol/openid-connect/certs}
+  client-id: ${KEYCLOAK_CLIENT_ID:admin-web}
+  client-secret: ${KEYCLOAK_CLIENT_SECRET:}
+  token-validation: ${KEYCLOAK_TOKEN_VALIDATION:offline}
+  admin-username: ${KEYCLOAK_ADMIN_USERNAME:admin}
+  admin-password: ${KEYCLOAK_ADMIN_PASSWORD:admin123}
+  claim-cif-key: ${KEYCLOAK_CLAIM_CIF_KEY:cif}
   clients:
-    admin-web: ${KEYCLOAK_CLIENT_ADMIN_WEB}
-    mobile-app: ${KEYCLOAK_CLIENT_MOBILE_APP}
+    admin-web: ${KEYCLOAK_CLIENT_ADMIN_WEB:admin-web}
+    mobile-app: ${KEYCLOAK_CLIENT_MOBILE_APP:mobile-app}

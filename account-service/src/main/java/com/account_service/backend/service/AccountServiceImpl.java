@@ -97,43 +97,37 @@ public class AccountServiceImpl implements AccountService {
             CbsAccountDetailsResponse.CbsAccountDetailItem item = cbs.getAccount();
 
             List<DebitCardResponse> cards = new ArrayList<>();
-            if (cbs.getCards() != null) {
-                cbs.getCards().values().forEach(cardList -> cardList.forEach(c ->
-                        cards.add(DebitCardResponse.builder()
-                                .cardNumber(c.getCardNumber())
-                                .cardType(c.getCardType())
-                                .status(c.getStatus())
-                                .expiryDate(c.getExpiryDate())
-                                .dailyAtmLimit(new BigDecimal("50000.00"))
-                                .dailyPosLimit(new BigDecimal("100000.00"))
-                                .internationalUsage(false)
-                                .contactlessEnabled(true)
-                                .build())
-                ));
-            }
+            cbs.getCardList().forEach(c ->
+                    cards.add(DebitCardResponse.builder()
+                            .cardNumber(c.getCardNumber())
+                            .cardType(c.getCardType())
+                            .status(c.getStatus())
+                            .expiryDate(c.getExpiryDate())
+                            .dailyAtmLimit(new BigDecimal("50000.00"))
+                            .dailyPosLimit(new BigDecimal("100000.00"))
+                            .internationalUsage(false)
+                            .contactlessEnabled(true)
+                            .build())
+            );
 
             List<JointHolderDto> jointHolders = new ArrayList<>();
-            if (cbs.getRelatedParties() != null) {
-                cbs.getRelatedParties().values().forEach(jList -> jList.forEach(jh ->
-                        jointHolders.add(JointHolderDto.builder()
-                                .customerId(jh.getCustomerId())
-                                .name(jh.getName())
-                                .relationship(jh.getRelationship())
-                                .build())
-                ));
-            }
+            cbs.getRelatedPartiesList().forEach(jh ->
+                    jointHolders.add(JointHolderDto.builder()
+                            .customerId(jh.getCustomerId())
+                            .name(jh.getName())
+                            .relationship(jh.getRelationship())
+                            .build())
+            );
 
             List<NomineeDto> nominees = new ArrayList<>();
-            if (cbs.getNominees() != null) {
-                cbs.getNominees().values().forEach(nList -> nList.forEach(n ->
-                        nominees.add(NomineeDto.builder()
-                                .name(n.getName())
-                                .relation(n.getRelation())
-                                .sharePercentage(n.getSharePercentage() != null ? n.getSharePercentage() : 100)
-                                .minor(false)
-                                .build())
-                ));
-            }
+            cbs.getNomineeList().forEach(n ->
+                    nominees.add(NomineeDto.builder()
+                            .name(n.getName())
+                            .relation(n.getRelation())
+                            .sharePercentage(n.getSharePercentage() != null ? n.getSharePercentage() : 100)
+                            .minor(false)
+                            .build())
+            );
 
             LocalDate openDate = null;
             if (item.getOpenDate() != null) {
@@ -219,11 +213,8 @@ public class AccountServiceImpl implements AccountService {
                 count
         );
 
-        if (cbsStmtOpt.isPresent() && cbsStmtOpt.get().getTransactions() != null) {
-            List<CbsStatementResponse.CbsTransactionRecord> cbsTxns = new ArrayList<>();
-            cbsStmtOpt.get().getTransactions().values().forEach(cbsTxns::addAll);
-
-            List<TransactionResponse> txns = cbsTxns.stream()
+        if (cbsStmtOpt.isPresent()) {
+            List<TransactionResponse> txns = cbsStmtOpt.get().getTransactionList().stream()
                     .limit(count)
                     .map(this::toTransactionResponse)
                     .toList();
@@ -275,11 +266,8 @@ public class AccountServiceImpl implements AccountService {
                     size
             );
 
-            if (cbsStmtOpt.isPresent() && cbsStmtOpt.get().getTransactions() != null) {
-                List<CbsStatementResponse.CbsTransactionRecord> cbsTxns = new ArrayList<>();
-                cbsStmtOpt.get().getTransactions().values().forEach(cbsTxns::addAll);
-
-                List<TransactionResponse> txns = cbsTxns.stream()
+            if (cbsStmtOpt.isPresent()) {
+                List<TransactionResponse> txns = cbsStmtOpt.get().getTransactionList().stream()
                         .map(this::toTransactionResponse)
                         .toList();
 
@@ -362,9 +350,9 @@ public class AccountServiceImpl implements AccountService {
         log.info("Fetching linked cards for account: {}", accountNumber);
 
         Optional<CbsCardInquiryResponse> cbsCardOpt = cbsAdapter.getLinkedCards(accountNumber);
-        if (cbsCardOpt.isPresent() && cbsCardOpt.get().getCards() != null) {
+        if (cbsCardOpt.isPresent() && !cbsCardOpt.get().getCardList().isEmpty()) {
             List<DebitCardResponse> responses = new ArrayList<>();
-            cbsCardOpt.get().getCards().values().forEach(cardList -> cardList.forEach(c ->
+            cbsCardOpt.get().getCardList().forEach(c ->
                     responses.add(DebitCardResponse.builder()
                             .cardNumber(c.getCardNumber())
                             .cardType(c.getCardType())
@@ -375,10 +363,8 @@ public class AccountServiceImpl implements AccountService {
                             .internationalUsage(false)
                             .contactlessEnabled(true)
                             .build())
-            ));
-            if (!responses.isEmpty()) {
-                return responses;
-            }
+            );
+            return responses;
         }
 
         return List.of(DebitCardResponse.builder()

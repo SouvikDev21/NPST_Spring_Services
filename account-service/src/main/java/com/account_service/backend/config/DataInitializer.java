@@ -32,7 +32,7 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        log.info("Starting initial seed data loading for H2 database...");
+        log.info("Starting initial seed data loading for MySQL database...");
 
         // 1. Seed Customer Profile
         if (!customerProfileRepository.existsByCustomerId(CustomerConstants.DEFAULT_CUSTOMER_ID)) {
