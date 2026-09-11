@@ -13,9 +13,12 @@ public interface AccountService {
 
     AccountResponse getAccountByAccountNumber(String accountNumber);
 
-    List<AccountResponse> getAccountsByCustomerId(String customerId);
+    List<AccountResponse> getAccountsByCifId(String cifId);
 
     AccountBalanceResponse getAccountBalance(String accountNumber);
 
-    AccountResponse updateAccountStatus(String accountNumber, UpdateAccountStatusRequest request);
+    AccountResponse updateAccountStatus(
+            String accountNumber,
+            UpdateAccountStatusRequest request
+    );
 }

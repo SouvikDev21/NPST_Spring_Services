@@ -13,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @Slf4j
@@ -28,29 +27,20 @@ public class AccountServiceImpl implements AccountService {
     @Transactional
     public AccountResponse createAccount(CreateAccountRequest request) {
 
-        log.info(
-                "Creating local account representation for CIF: {}, type: {}",
-                request.getCifId(),
-                request.getAccountType()
+        /*
+         * Account creation will be completed through the common CBS integration.
+         *
+         * Expected flow:
+         * Request → Common CBS Client → CBS → CBS Account Response
+         *         → Map CBS response → Save local Account representation
+         *
+         * Do not generate account number, IFSC, status, balance,
+         * or other CBS-owned values locally.
+         */
+
+        throw new UnsupportedOperationException(
+                "Account creation requires common CBS integration"
         );
-
-        Account account = Account.builder()
-                .cifId(request.getCifId())
-                .accountType(request.getAccountType())
-                .balance(request.getInitialDeposit())
-                .availableBalance(request.getInitialDeposit())
-                .currency(request.getCurrency())
-                .branchCode(request.getBranchCode())
-                .build();
-
-        Account savedAccount = accountRepository.save(account);
-
-        log.info(
-                "Local account representation created with ID: {}",
-                savedAccount.getId()
-        );
-
-        return accountMapper.toResponse(savedAccount);
     }
 
     @Override
@@ -60,18 +50,16 @@ public class AccountServiceImpl implements AccountService {
         log.info("Fetching account by account number");
 
         Account account = accountRepository.findByAccountNumber(accountNumber)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Account not found for account number: " + accountNumber
-                        )
-                );
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Account not found for account number: " + accountNumber
+                ));
 
         return accountMapper.toResponse(account);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<AccountResponse> getAccountsByCustomerId(String cifId) {
+    public List<AccountResponse> getAccountsByCifId(String cifId) {
 
         log.info("Fetching accounts for CIF");
 
@@ -89,11 +77,9 @@ public class AccountServiceImpl implements AccountService {
         log.info("Fetching balance for account");
 
         Account account = accountRepository.findByAccountNumber(accountNumber)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Account not found for account number: " + accountNumber
-                        )
-                );
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Account not found for account number: " + accountNumber
+                ));
 
         return accountMapper.toBalanceResponse(account);
     }
@@ -106,19 +92,24 @@ public class AccountServiceImpl implements AccountService {
     ) {
 
         log.info(
-                "Updating status of account to: {}",
+                "Updating status for account to: {}",
                 request.getStatus()
         );
 
         Account account = accountRepository.findByAccountNumber(accountNumber)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Account not found for account number: " + accountNumber
-                        )
-                );
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Account not found for account number: " + accountNumber
+                ));
 
-        account.setStatus(request.getStatus());
+        /*
+         * Final implementation will call the appropriate CBS operation
+         * (freeze/unfreeze) and then update the local representation.
+         *
+         * Do not change the local status independently of CBS.
+         */
 
-        return accountMapper.toResponse(account);
+        throw new UnsupportedOperationException(
+                "Account status update requires common CBS integration"
+        );
     }
 }
