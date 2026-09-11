@@ -1,3 +1,5 @@
+package com.fund_transfer.backend.service;
+
 import com.fund_transfer.backend.dto.Request.InitiateTransferRequest;
 import com.fund_transfer.backend.dto.Response.TransactionResponse;
 import com.fund_transfer.backend.entity.Transaction;
