@@ -1,7 +1,14 @@
 package com.term_deposit.common.exception;
 
 public class BusinessRuleViolationException extends RuntimeException {
-    public BusinessRuleViolationException(String message) {
+    private final String errorCode;
+
+    public BusinessRuleViolationException(String errorCode, String message) {
         super(message);
+        this.errorCode = errorCode;
+    }
+
+    public String getErrorCode() {
+        return errorCode;
     }
 }
