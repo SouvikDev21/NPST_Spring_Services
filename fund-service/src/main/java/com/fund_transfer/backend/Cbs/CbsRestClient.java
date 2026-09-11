@@ -1,13 +1,16 @@
 package com.fund_transfer.backend.Cbs;
 
 
+import tools.jackson.databind.JsonNode;
 import com.fund_transfer.backend.dto.Request.CbsDebitRequest;
 import com.fund_transfer.backend.dto.Request.CbsReversalRequest;
 import com.fund_transfer.backend.dto.Response.CbsBalanceResponse;
 import com.fund_transfer.backend.dto.Response.CbsDebitResponse;
 import com.fund_transfer.backend.dto.Response.CbsReversalResponse;
+import com.fund_transfer.backend.exception.CbsDebitException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.jackson.autoconfigure.JacksonProperties;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.ResourceAccessException;
@@ -17,10 +20,11 @@ import org.springframework.web.client.RestClientResponseException;
 import java.math.BigDecimal;
 import java.net.SocketTimeoutException;
 
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@Profile({"prod", "uat", "staging"}) // active wherever the mock is NOT — adjust to your actual profile names
+@Profile({"prod", "uat", "local"}) // active wherever the mock is NOT — adjust to your actual profile names
 public class CbsRestClient implements CbsClient {
 
     // Plain, synchronous RestClient bean — no Mono, no .block(), no reactive
@@ -31,23 +35,33 @@ public class CbsRestClient implements CbsClient {
     private final CbsProperties cbsProperties;
 
     @Override
-    public BigDecimal getAvailableBalance(String ownerCif, String ownerAccountNumber) {
+    public BigDecimal getAvailableBalance( String ownerAccountNumber) {
         try {
-            CbsBalanceResponse response = cbsRestClient.get()
+            JsonNode rawResponse = cbsRestClient.get()
                     .uri(cbsProperties.getBalanceInquiryPath(), ownerAccountNumber)
                     .retrieve()
-                    .body(CbsBalanceResponse.class);
+                    .body(JsonNode.class);
 
-            if (response == null || response.availableBalance() == null) {
-                //throw new CbsDebitException("CBS returned an empty balance response for account " + ownerAccountNumber);
-                return BigDecimal.ONE;
+            log.info("CBS raw response: {}", rawResponse.toPrettyString());
+
+            JsonNode accountNode = rawResponse.path("account");
+
+            if (accountNode.isMissingNode() || accountNode.path("availableBalance").isMissingNode()) {
+                throw new CbsDebitException("CBS returned an empty balance response for account " + ownerAccountNumber);
             }
-            return response.availableBalance();
 
-        } catch (RestClientResponseException e) {
+            String accountNumber = accountNode.path("accountId").asText();
+            BigDecimal availableBalance = accountNode.path("availableBalance").decimalValue();
+            String currency = accountNode.path("currency").asText();
+
+            CbsBalanceResponse response = new CbsBalanceResponse(accountNumber, availableBalance, currency);
+
+            return response.AvailableBalance();
+
+        }catch (RestClientResponseException e) {
             // CBS responded, just with a 4xx/5xx status — a definite answer, not an unknown.
             log.error("CBS balance inquiry failed with status {}: {}", e.getStatusCode(), e.getResponseBodyAsString());
-            //throw new CbsDebitException("Failed to fetch balance from CBS: " + e.getStatusCode(), e);
+            throw new CbsDebitException("Failed to fetch balance from CBS: " + e.getStatusCode(), e);
 
         } catch (ResourceAccessException e) {
             // RestClient's umbrella for connection failures AND timeouts (both
@@ -56,16 +70,16 @@ public class CbsRestClient implements CbsClient {
             // low-risk either way — no money has moved yet regardless of outcome —
             // so treating it as a plain failure is fine here, unlike in debit() below.
             log.error("CBS balance inquiry network/timeout error", e);
-            //throw new CbsDebitException("Could not reach CBS for balance inquiry", e);
+            throw new CbsDebitException("Could not reach CBS for balance inquiry", e);
         }
-        return BigDecimal.ONE;
+
     }
 
     @Override
-    public String debit(String ownerCif, String ownerAccountNumber, BigDecimal amount, String idempotencyKey) {
+    public String debit(String ownerAccountNumber, BigDecimal amount, String idempotencyKey) {
         // Plain records don't have @Builder — call the canonical constructor
         // directly, in the order fields were declared.
-        CbsDebitRequest requestBody = new CbsDebitRequest(ownerCif, ownerAccountNumber, amount, idempotencyKey);
+        CbsDebitRequest requestBody = new CbsDebitRequest( ownerAccountNumber, amount, idempotencyKey);
 
         try {
             CbsDebitResponse response = cbsRestClient.post()
@@ -75,11 +89,11 @@ public class CbsRestClient implements CbsClient {
                     .body(CbsDebitResponse.class);
 
             if (response == null) {
-                //throw new CbsDebitException("CBS returned an empty debit response");
+                throw new CbsDebitException("CBS returned an empty debit response");
             }
             if (!"SUCCESS".equalsIgnoreCase(response.status())) {
-               // throw new CbsDebitException(
-                        //"CBS debit rejected: " + response.reasonCode() + " - " + response.reasonMessage());
+                throw new CbsDebitException(
+                        "CBS debit rejected: " + response.reasonCode() + " - " + response.reasonMessage());
             }
             return response.debitReference();
 

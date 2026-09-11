@@ -13,6 +13,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
+
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.Instant;
 import java.util.UUID;
@@ -75,7 +77,7 @@ public class Transaction {
     private String destinationIfscCode;
 
     @Column(name = "amount_minor_units", nullable = false)
-    private BigInteger amountMinorUnits; // paise, never a float/decimal
+    private BigDecimal amountMinorUnits; // paise, never a float/decimal
 
     @Column(nullable = false, length = 3)
     private String currency;

@@ -9,7 +9,7 @@ public interface CbsClient {
      * Step 1 helper — read current available balance for the owner account.
      * Used for the pre-check before attempting a debit.
      */
-    BigDecimal getAvailableBalance(String ownerCif, String ownerAccountNumber);
+    BigDecimal getAvailableBalance(String ownerAccountNumber);
 
     /**
      * Step 2 — debit the owner's account for the transfer amount.
@@ -24,7 +24,7 @@ public interface CbsClient {
      *         responsible for querying debit status rather than assuming
      *         failure — see TransactionService.
      */
-    String debit(String ownerCif, String ownerAccountNumber, BigDecimal amount, String idempotencyKey);
+    String debit( String ownerAccountNumber, BigDecimal amount, String idempotencyKey);
 
     /**
      * Step 5 — compensating transaction: credit the amount back to the owner
