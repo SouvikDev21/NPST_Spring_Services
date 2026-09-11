@@ -34,7 +34,7 @@ public class TransactionService {
         // with no cleanup required.
         // ---------------------------------------------------------------
         BigDecimal availableBalance = cbsClient.getAvailableBalance(
-                request.initiatorCif(), request.InitiatorAccountNumber());
+              request.InitiatorAccountNumber());
 
         if (availableBalance.compareTo(request.amountMinorUnits()) < 0) {
             // Un-commented — this was silently swallowing insufficient-balance
@@ -58,7 +58,6 @@ public class TransactionService {
         String debitReference;
         try {
             debitReference = cbsClient.debit(
-                    request.initiatorCif(),
                     request.InitiatorAccountNumber(),
                     request.amountMinorUnits(),
                     request.idempotencyKey());
