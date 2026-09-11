@@ -7,14 +7,12 @@ import com.fund_transfer.backend.dto.Response.ScheduledTransferResponse;
 import com.fund_transfer.backend.entity.ScheduledTransfer;
 import com.fund_transfer.backend.enums.ScheduleStatus;
 import com.fund_transfer.backend.repository.ScheduledTransferRepository;
-import com.fund_transfer.backend.repository.ScheduledTransferRepository;
 import com.fund_transfer.backend.security.AuthenticatedUser;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
-
 @Service
 public class ScheduledTransferService {
 
