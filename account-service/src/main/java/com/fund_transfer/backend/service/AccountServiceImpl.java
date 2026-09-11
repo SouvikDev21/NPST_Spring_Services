@@ -1,6 +1,5 @@
 package com.fund_transfer.backend.service;
 
-import com.fund_transfer.backend.common.constants.AccountConstants;
 import com.fund_transfer.backend.common.exception.ResourceNotFoundException;
 import com.fund_transfer.backend.dto.Mapper.AccountMapper;
 import com.fund_transfer.backend.dto.Request.CreateAccountRequest;
@@ -8,7 +7,6 @@ import com.fund_transfer.backend.dto.Request.UpdateAccountStatusRequest;
 import com.fund_transfer.backend.dto.Response.AccountBalanceResponse;
 import com.fund_transfer.backend.dto.Response.AccountResponse;
 import com.fund_transfer.backend.entity.Account;
-import com.fund_transfer.backend.enums.AccountStatus;
 import com.fund_transfer.backend.repository.AccountRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Random;
 
 @Slf4j
 @Service
@@ -30,45 +27,56 @@ public class AccountServiceImpl implements AccountService {
     @Override
     @Transactional
     public AccountResponse createAccount(CreateAccountRequest request) {
-        log.info("Creating account for customer: {}, type: {}", request.getCustomerId(), request.getAccountType());
 
-        String generatedAccountNumber = generateUniqueAccountNumber();
-        BigDecimal initialDeposit = request.getInitialDeposit() != null ? request.getInitialDeposit() : BigDecimal.ZERO;
-        String currency = request.getCurrency() != null ? request.getCurrency() : AccountConstants.DEFAULT_CURRENCY;
-        String branchCode = request.getBranchCode() != null ? request.getBranchCode() : AccountConstants.DEFAULT_BRANCH_CODE;
-        String ifscCode = AccountConstants.DEFAULT_IFSC_PREFIX + branchCode;
+        log.info(
+                "Creating local account representation for CIF: {}, type: {}",
+                request.getCifId(),
+                request.getAccountType()
+        );
 
         Account account = Account.builder()
-                .accountNumber(generatedAccountNumber)
-                .customerId(request.getCustomerId())
+                .cifId(request.getCifId())
                 .accountType(request.getAccountType())
-                .status(AccountStatus.ACTIVE)
-                .balance(initialDeposit)
-                .availableBalance(initialDeposit)
-                .currency(currency)
-                .branchCode(branchCode)
-                .ifscCode(ifscCode)
+                .balance(request.getInitialDeposit())
+                .availableBalance(request.getInitialDeposit())
+                .currency(request.getCurrency())
+                .branchCode(request.getBranchCode())
                 .build();
 
-        Account saved = accountRepository.save(account);
-        log.info("Account created successfully with account number: {}", saved.getAccountNumber());
-        return accountMapper.toResponse(saved);
+        Account savedAccount = accountRepository.save(account);
+
+        log.info(
+                "Local account representation created with ID: {}",
+                savedAccount.getId()
+        );
+
+        return accountMapper.toResponse(savedAccount);
     }
 
     @Override
     @Transactional(readOnly = true)
     public AccountResponse getAccountByAccountNumber(String accountNumber) {
-        log.info("Fetching account by account number: {}", accountNumber);
+
+        log.info("Fetching account by account number");
+
         Account account = accountRepository.findByAccountNumber(accountNumber)
-                .orElseThrow(() -> new ResourceNotFoundException(AccountConstants.ERR_ACCOUNT_NOT_FOUND + accountNumber));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Account not found for account number: " + accountNumber
+                        )
+                );
+
         return accountMapper.toResponse(account);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<AccountResponse> getAccountsByCustomerId(String customerId) {
-        log.info("Fetching all accounts for customer: {}", customerId);
-        List<Account> accounts = accountRepository.findByCustomerId(customerId);
+    public List<AccountResponse> getAccountsByCustomerId(String cifId) {
+
+        log.info("Fetching accounts for CIF");
+
+        List<Account> accounts = accountRepository.findByCifId(cifId);
+
         return accounts.stream()
                 .map(accountMapper::toResponse)
                 .toList();
@@ -77,32 +85,40 @@ public class AccountServiceImpl implements AccountService {
     @Override
     @Transactional(readOnly = true)
     public AccountBalanceResponse getAccountBalance(String accountNumber) {
-        log.info("Fetching balance for account: {}", accountNumber);
+
+        log.info("Fetching balance for account");
+
         Account account = accountRepository.findByAccountNumber(accountNumber)
-                .orElseThrow(() -> new ResourceNotFoundException(AccountConstants.ERR_ACCOUNT_NOT_FOUND + accountNumber));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Account not found for account number: " + accountNumber
+                        )
+                );
+
         return accountMapper.toBalanceResponse(account);
     }
 
     @Override
     @Transactional
-    public AccountResponse updateAccountStatus(String accountNumber, UpdateAccountStatusRequest request) {
-        log.info("Updating status of account {} to {}", accountNumber, request.getStatus());
+    public AccountResponse updateAccountStatus(
+            String accountNumber,
+            UpdateAccountStatusRequest request
+    ) {
+
+        log.info(
+                "Updating status of account to: {}",
+                request.getStatus()
+        );
+
         Account account = accountRepository.findByAccountNumber(accountNumber)
-                .orElseThrow(() -> new ResourceNotFoundException(AccountConstants.ERR_ACCOUNT_NOT_FOUND + accountNumber));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Account not found for account number: " + accountNumber
+                        )
+                );
 
         account.setStatus(request.getStatus());
-        Account updated = accountRepository.save(account);
-        log.info("Account {} status updated to {}", accountNumber, updated.getStatus());
-        return accountMapper.toResponse(updated);
-    }
 
-    private String generateUniqueAccountNumber() {
-        Random random = new Random();
-        String accountNumber;
-        do {
-            long number = 100000000000L + (long) (random.nextDouble() * 899999999999L);
-            accountNumber = String.valueOf(number);
-        } while (accountRepository.existsByAccountNumber(accountNumber));
-        return accountNumber;
+        return accountMapper.toResponse(account);
     }
 }

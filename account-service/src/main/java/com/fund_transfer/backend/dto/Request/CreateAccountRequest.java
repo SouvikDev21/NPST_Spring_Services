@@ -1,6 +1,7 @@
 package com.fund_transfer.backend.dto.Request;
 
 import com.fund_transfer.backend.enums.AccountType;
+import com.fund_transfer.backend.enums.Currency;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -17,16 +18,16 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class CreateAccountRequest {
 
-    @NotBlank(message = "Customer ID is required")
-    private String customerId;
+    @NotBlank(message = "CIF ID is required")
+    private String cifId;
 
-    @NotNull(message = "Account Type is required")
+    @NotNull(message = "Account type is required")
     private AccountType accountType;
 
     @DecimalMin(value = "0.00", message = "Initial deposit cannot be negative")
     private BigDecimal initialDeposit;
 
-    private String currency;
+    private Currency currency;
 
     private String branchCode;
 }

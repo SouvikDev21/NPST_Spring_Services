@@ -5,7 +5,7 @@ import com.fund_transfer.backend.dto.Response.AccountResponse;
 import com.fund_transfer.backend.entity.Account;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
+import java.time.OffsetDateTime;
 
 @Component
 public class AccountMapper {
@@ -18,7 +18,7 @@ public class AccountMapper {
         return AccountResponse.builder()
                 .id(account.getId())
                 .accountNumber(account.getAccountNumber())
-                .customerId(account.getCustomerId())
+                .cifId(account.getCifId())
                 .accountType(account.getAccountType())
                 .status(account.getStatus())
                 .balance(account.getBalance())
@@ -26,6 +26,7 @@ public class AccountMapper {
                 .currency(account.getCurrency())
                 .branchCode(account.getBranchCode())
                 .ifscCode(account.getIfscCode())
+                .openedDate(account.getOpenedDate())
                 .createdAt(account.getCreatedAt())
                 .updatedAt(account.getUpdatedAt())
                 .build();
@@ -41,7 +42,7 @@ public class AccountMapper {
                 .balance(account.getBalance())
                 .availableBalance(account.getAvailableBalance())
                 .currency(account.getCurrency())
-                .asOf(Instant.now())
+                .asOf(OffsetDateTime.now())
                 .build();
     }
 }

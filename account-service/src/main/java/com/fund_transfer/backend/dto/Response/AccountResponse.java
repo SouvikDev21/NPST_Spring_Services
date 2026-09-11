@@ -2,13 +2,15 @@ package com.fund_transfer.backend.dto.Response;
 
 import com.fund_transfer.backend.enums.AccountStatus;
 import com.fund_transfer.backend.enums.AccountType;
+import com.fund_transfer.backend.enums.Currency;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.Instant;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Data
@@ -16,16 +18,30 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AccountResponse {
+
     private UUID id;
+
     private String accountNumber;
-    private String customerId;
+
+    private String cifId;
+
     private AccountType accountType;
+
     private AccountStatus status;
+
     private BigDecimal balance;
+
     private BigDecimal availableBalance;
-    private String currency;
+
+    private Currency currency;
+
     private String branchCode;
+
     private String ifscCode;
-    private Instant createdAt;
-    private Instant updatedAt;
+
+    private LocalDate openedDate;
+
+    private OffsetDateTime createdAt;
+
+    private OffsetDateTime updatedAt;
 }
