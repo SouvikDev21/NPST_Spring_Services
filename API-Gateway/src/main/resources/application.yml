@@ -1,0 +1,98 @@
+server:
+  port: 8765
+
+spring:
+  application:
+    # This is the name the Gateway registers itself under in Eureka.
+    name: API-GATEWAY
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # CHANGE ME: replace with your real Keycloak realm issuer URI.
+          # Format: http://<keycloak-host>:<port>/realms/<realm-name>
+          # Spring Security calls <issuer-uri>/.well-known/openid-configuration
+          # to auto-discover Keycloak's JWK Set (public keys) for JWT validation.
+          issuer-uri: http://localhost:8080/realms/bank
+
+  cloud:
+    gateway:
+      server:
+        webflux:
+          # Global CORS example — adjust origins for your real frontend(s).
+          # Remove or tighten this before production.
+          # globalcors:
+          #   cors-configurations:
+          #     '[/**]':
+          #       allowedOrigins: "http://localhost:4200"
+          #       allowedMethods: "*"
+
+          routes:
+            # ---------------------------------------------------------------
+            # Spring Boot microservices — discovered dynamically via Eureka.
+            # "lb://SERVICE-NAME" tells the Gateway to ask Eureka for a live
+            # instance of that service and load-balance across instances.
+            # SERVICE-NAME must exactly match spring.application.name of
+            # that downstream service (case-insensitive).
+            # ---------------------------------------------------------------
+            - id: account-service
+              uri: lb://ACCOUNT-SERVICE
+              predicates:
+                - Path=/api/accounts/**
+
+            - id: fund-transfer-service
+              uri: lb://FUND-TRANSFER-SERVICE
+              predicates:
+                - Path=/api/fund-transfer/**
+
+            - id: loan-service
+              uri: lb://LOAN-SERVICE
+              predicates:
+                - Path=/api/loans/**
+
+            - id: other-services
+              uri: lb://OTHER-SERVICES
+              predicates:
+                - Path=/api/services/**
+
+            # ---------------------------------------------------------------
+            # NestJS microservices — NOT registered with Eureka yet, so we
+            # route directly to their host:port. CHANGE ME: update these
+            # URLs once these services move behind Eureka, or if their
+            # ports/hosts differ in your environment.
+            # ---------------------------------------------------------------
+            - id: auth-service
+              uri: http://localhost:3000
+              predicates:
+                - Path=/api/auth/**
+
+            - id: bills-service
+              uri: http://localhost:3001
+              predicates:
+                - Path=/api/bills/**
+
+            - id: admin-service
+              uri: http://localhost:3002
+              predicates:
+                - Path=/api/admin/**
+
+eureka:
+  client:
+    service-url:
+      # CHANGE ME if your Eureka server runs somewhere other than localhost:8761
+      defaultZone: http://localhost:8761/eureka/
+    # Fetch the registry so the Gateway can resolve lb:// URIs to live instances
+    fetch-registry: true
+    register-with-eureka: true
+  instance:
+    # Prefer IP address registration; useful in containerized environments
+    prefer-ip-address: true
+
+# Expose a minimal set of actuator endpoints for local development/health checks.
+# Tighten this (e.g. only "health") before deploying to production.
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
