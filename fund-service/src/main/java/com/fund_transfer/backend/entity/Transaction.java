@@ -1,44 +1,33 @@
 package com.fund_transfer.backend.entity;
 
-
 import com.fund_transfer.backend.enums.TransactionStatus;
-import com.fund_transfer.backend.enums.TransferMode;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Index;
-import jakarta.persistence.Table;
-import jakarta.persistence.Version;
-
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.time.Instant;
-import java.util.UUID;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-/** The funds-transfer record itself. Status transitions are guarded by {@code TransactionStateMachine}. */
+import java.math.BigInteger;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.UUID;
+
+/**
+ * Durable record of a transfer's saga state.
+ *
+ * idempotencyKey has a UNIQUE constraint — this is the real safety net
+ * against a concurrent duplicate request, not the findByIdempotencyKey()
+ * check in the service (that check has a race window between read and
+ * insert; the DB constraint is what actually prevents two rows for the
+ * same key under concurrent load — catch the DataIntegrityViolationException
+ * on save() as a fallback signal that this was a race-losing duplicate).
+ */
 @Entity
 @Table(
-        name = "transaction",
-        indexes = {
-                @Index(name = "idx_transaction_initiator_cif", columnList = "initiator_cif"),
-                @Index(name = "idx_transaction_status", columnList = "status"),
-                @Index(name = "idx_transaction_reference", columnList = "transaction_reference", unique = true),
-                @Index(name = "idx_transaction_idempotency_key", columnList = "idempotency_key", unique = true)
-        }
+        name = "transactions",
+        uniqueConstraints = @UniqueConstraint(name = "uq_idempotency_key", columnNames = "idempotency_key")
 )
-@EntityListeners(AuditingEntityListener.class)
 @Getter
 @Setter
 @Builder
@@ -46,73 +35,71 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @AllArgsConstructor
 public class Transaction {
 
+    // UUID primary key instead of an auto-increment Long. Generated in
+    // Java (see @PrePersist below) rather than DB-generated, so the id is
+    // known immediately on the entity even before the INSERT runs — useful
+    // if you need to log/reference it before the transaction commits.
+    // transactionReference stays as a separate human/business-facing
+    // identifier (see class docs) distinct from this internal PK.
     @Id
-    @GeneratedValue
+    @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
 
-    @Column(name = "transaction_reference", nullable = false, unique = true, length = 40)
-    private String transactionReference; // our own reference, generated at INITIATED
+    // Our own durable identifier — see TransactionService for generation.
+    @Column(name = "transaction_reference", nullable = false, unique = true, length = 64)
+    private String transactionReference;
 
-    @Column(name = "cbs_reference_number", length = 40)
-    private String cbsReferenceNumber; // nullable until CBS/Switch confirms it
+    // Client-supplied retry-deduplication key, from the Idempotency-Key header.
+    @Column(name = "idempotency_key", nullable = false, length = 128)
+    private String idempotencyKey;
 
-    @Column(name = "idempotency_key", nullable = false, unique = true, length = 128)
-    private String idempotencyKey; // defense in depth alongside the generic IdempotencyRecord table
+    @Column(name = "initiator_account_number", nullable = false, length = 34)
+    private String initiatorAccountNumber;
 
-    @Column(name = "initiator_cif", nullable = false, length = 20)
-    private String initiatorCif;
-
-    @Column(name = "initiator_keycloak_user_id", nullable = false)
-    private UUID initiatorKeycloakUserId;
-
-    @Column(name = "beneficiary_id")
-    private UUID beneficiaryId; // nullable — a one-time payee not saved as a Beneficiary is still a valid transfer
-
-    // Destination details are DENORMALIZED here, not just a join to Beneficiary — a Transaction
-    // must stay accurate and immutable even if the Beneficiary is later edited or deleted.
-    @Column(name = "destination_account_number", nullable = false, length = 30)
+    @Column(name = "destination_account_number", nullable = false, length = 34)
     private String destinationAccountNumber;
 
-    @Column(name = "destination_ifsc_code", nullable = false, length = 11)
-    private String destinationIfscCode;
+    @Column(name = "beneficiary_ifsc", nullable = false, length = 11)
+    private String beneficiaryIfsc;
 
-    @Column(name = "amount_minor_units", nullable = false)
-    private BigDecimal amountMinorUnits; // paise, never a float/decimal
-
-    @Column(nullable = false, length = 3)
-    private String currency;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "transfer_mode", nullable = false, length = 20)
-    private TransferMode transferMode;
+    // Stored as NUMERIC(20,0) in the DB — BigInteger paise, never a decimal
+    // rupee value. Map explicitly to avoid Hibernate inferring a scale.
+    @Column(name = "amount_minor_units", nullable = false, precision = 20, scale = 0)
+    private BigInteger amountMinorUnits;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Column(name = "status", nullable = false, length = 20)
     private TransactionStatus status;
 
-    @Column(name = "failure_reason", length = 255)
+    // Reference returned by CBS for the debit call — needed for reversal.
+    @Column(name = "cbs_debit_reference", length = 64)
+    private String cbsDebitReference;
+
+    @Column(name = "failure_reason", length = 512)
     private String failureReason;
 
-    @Column(length = 255)
-    private String remarks;
+    // OffsetDateTime, not Instant — persisted and serialized as a proper
+    // ISO-8601 string with an explicit offset (we always write it in UTC,
+    // "Z"), rather than a raw epoch/system timestamp. Easier to read
+    // directly out of the DB and unambiguous for any downstream consumer.
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private OffsetDateTime createdAt;
 
-    @Column(name = "bank_code", nullable = false, length = 20)
-    private String bankCode;
+    @Column(name = "updated_at", nullable = false)
+    private OffsetDateTime updatedAt;
 
-    @Version
-    private Long version; // critical — ReconciliationJob and a live status check both write to this row
+    @PrePersist
+    void onCreate() {
+        if (this.id == null) {
+            this.id = UUID.randomUUID();
+        }
+        OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+        this.createdAt = now;
+        this.updatedAt = now;
+    }
 
-    @Column(name = "initiated_at", nullable = false)
-    private Instant initiatedAt;
-
-    @Column(name = "completed_at")
-    private Instant completedAt;
-
-    @CreatedDate
-    @Column(name = "created_at", updatable = false)
-    private Instant createdAt;
-
-    @LastModifiedDate
-    @Column(name = "updated_at")
-    private Instant updatedAt;
+    @PreUpdate
+    void onUpdate() {
+        this.updatedAt = OffsetDateTime.now(ZoneOffset.UTC);
+    }
 }

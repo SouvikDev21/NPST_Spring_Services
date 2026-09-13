@@ -1,27 +1,26 @@
 package com.fund_transfer.backend.controller;
 
-import com.fund_transfer.backend.dto.Request.InitiateTransferRequest;
+import com.fund_transfer.backend.dto.Request.TransferRequest;
 import com.fund_transfer.backend.dto.Response.TransactionResponse;
 
-import com.fund_transfer.backend.service.FundTransferService;
+import com.fund_transfer.backend.service.TransactionService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/fund-transfer")
+@RequiredArgsConstructor
 public class FundTransferController {
-
-    private final FundTransferService fundTransferService;
-
-    public FundTransferController(FundTransferService fundTransferService) {
-        this.fundTransferService = fundTransferService;
-    }
-
+    private final TransactionService transactionService;
     @PostMapping("/initiate")
-    public ResponseEntity<TransactionResponse> initiateTransfer(@RequestBody InitiateTransferRequest request) {
-        return ResponseEntity.ok(fundTransferService.initiateTransfer(request));
+    public ResponseEntity<TransactionResponse> transfer(
+            @RequestHeader("Idempotency-Key") @NotBlank String idempotencyKey,
+            @Valid @RequestBody TransferRequest request) {
+
+        TransactionResponse response = transactionService.processTransfer(request, idempotencyKey);
+        return ResponseEntity.ok(response);
     }
 }
