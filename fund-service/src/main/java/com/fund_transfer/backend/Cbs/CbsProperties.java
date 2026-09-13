@@ -14,8 +14,8 @@ public class CbsProperties {
     private String baseUrl;
 
     // Endpoint paths — adjust to match CBS's actual API once you have docs.
-    private String balanceInquiryPath = "/accounts/{accountNumber}/balance";
-    private String debitPath = "/accounts/debit";
+    private String balanceInquiryPath ;
+    private String debitPath = "/";
     private String reversalPath = "/accounts/reverse";
 
     // Connection/read timeouts in milliseconds.

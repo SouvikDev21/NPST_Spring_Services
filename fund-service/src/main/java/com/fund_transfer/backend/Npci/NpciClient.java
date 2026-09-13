@@ -1,6 +1,7 @@
 package com.fund_transfer.backend.Npci;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 
 public interface NpciClient {
 
@@ -11,5 +12,5 @@ public interface NpciClient {
      * so the caller can distinguish "definitely failed" from "unknown" —
      * those two cases should NOT both trigger an automatic reversal blindly.
      */
-    boolean disburse(String beneficiaryAccountNumber, String ifscCode, BigDecimal amount, String idempotencyKey);
+    boolean disburse(String beneficiaryAccountNumber, String ifscCode, BigInteger amount, String idempotencyKey);
 }

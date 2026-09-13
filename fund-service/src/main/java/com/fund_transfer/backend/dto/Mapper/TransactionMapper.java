@@ -13,28 +13,12 @@ public class TransactionMapper {
             return null;
         }
 
-        return new TransactionResponse(
-                transaction.getId(),
-                transaction.getTransactionReference(),
-                transaction.getCbsReferenceNumber(),
-                transaction.getIdempotencyKey(),
-                transaction.getInitiatorCif(),
-                transaction.getInitiatorKeycloakUserId(),
-                transaction.getBeneficiaryId(),
-                transaction.getDestinationAccountNumber(),
-                transaction.getDestinationIfscCode(),
-                transaction.getAmountMinorUnits(),
-                transaction.getCurrency(),
-                transaction.getTransferMode(),
-                transaction.getStatus(),
-                transaction.getFailureReason(),
-                transaction.getRemarks(),
-                transaction.getBankCode(),
-                transaction.getVersion(),
-                transaction.getInitiatedAt(),
-                transaction.getCompletedAt(),
-                transaction.getCreatedAt(),
-                transaction.getUpdatedAt()
-        );
+        return TransactionResponse.builder()
+                .transactionReference(transaction.getTransactionReference())
+                .status(transaction.getStatus())
+                .amountMinorUnits(transaction.getAmountMinorUnits())
+                .failureReason(transaction.getFailureReason())
+                .completedAt(transaction.getUpdatedAt())
+                .build();
     }
 }

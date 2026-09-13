@@ -17,7 +17,7 @@ public class CbsClientConfig {
     private final CbsProperties cbsProperties;
 
     @Bean
-    public RestClient cbsRestClient() {
+    public RestClient CbsRestClient() {
         // RequestConfig carries the connect timeout; "response timeout" here
         // is the Apache HttpClient 5 equivalent of what we called "read timeout"
         // when this was WebClient — how long to wait for CBS to respond once
