@@ -1,10 +1,11 @@
 package com.fund_transfer.backend.dto.Request;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 
 public record CbsReversalRequest(
         String originalDebitReference,
-        BigDecimal amount,
+        BigInteger amount,
         String requestId // idempotency key for the reversal call itself
 ) {
 }

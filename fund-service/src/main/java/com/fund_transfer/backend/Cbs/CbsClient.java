@@ -2,6 +2,7 @@ package com.fund_transfer.backend.Cbs;
 
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 
 public interface CbsClient {
 
@@ -36,5 +37,5 @@ public interface CbsClient {
      *         reversal itself cannot be confirmed — this must escalate to
      *         manual reconciliation, never fail silently.
      */
-    void reverseDebit(String debitReference, BigDecimal amount, String idempotencyKey);
+    void reverseDebit(String debitReference, BigInteger amount, String idempotencyKey);
 }

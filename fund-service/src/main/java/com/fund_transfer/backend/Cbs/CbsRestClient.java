@@ -18,6 +18,7 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.SocketTimeoutException;
 
 
@@ -134,7 +135,7 @@ public class CbsRestClient implements CbsClient {
     }
 
     @Override
-    public void reverseDebit(String debitReference, BigDecimal amount, String idempotencyKey) {
+    public void reverseDebit(String debitReference, BigInteger amount, String idempotencyKey) {
         CbsReversalRequest requestBody = new CbsReversalRequest(debitReference, amount, idempotencyKey);
 
         try {
