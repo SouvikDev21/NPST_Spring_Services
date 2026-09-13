@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Component
@@ -17,7 +18,7 @@ public class MockNpciClient implements NpciClient {
     private static final double FAILURE_RATE = 0.2; // 20% simulated failures
 
     @Override
-    public boolean disburse(String beneficiaryAccountNumber, String ifscCode, BigDecimal amount, String idempotencyKey) {
+    public boolean disburse(String beneficiaryAccountNumber, String ifscCode, BigInteger amount, String idempotencyKey) {
         // Simulate network latency
         try {
             Thread.sleep(150);
