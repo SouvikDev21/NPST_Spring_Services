@@ -1,4 +1,4 @@
-package com.fund_transfer.backend.exceptionHandler;
+package exceptionHandler;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
