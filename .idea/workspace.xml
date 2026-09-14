@@ -5,16 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fc54abec-f6cd-49fa-8c4b-1ba8fde20984" name="Changes" comment="Merge remote-tracking branch 'origin/feat/fund_transfer' into feat/fund_transfer&#10;&#10;# Conflicts:&#10;#&#9;fund-service/src/main/resources/application.properties">
-      <change beforePath="$PROJECT_DIR$/.idea/runConfigurations/BackendApplication.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/runConfigurations/BackendApplication.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/scheduler/ScheduledTransferBeneficiaryResolver.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/Cbs/CbsClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/Cbs/CbsClient.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/Cbs/CbsRestClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/Cbs/CbsRestClient.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/controller/BeneficiaryController.java" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/controller/BeneficiaryController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/dto/Request/CbsDebitRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/dto/Request/CbsDebitRequest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/exceptionHandler/ErrorResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/exceptionHandler/ErrorResponse.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/exceptionHandler/GlobalExceptionHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/exceptionHandler/GlobalExceptionHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/service/BeneficiaryService.java" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/service/BeneficiaryService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/service/TransactionService.java" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/service/TransactionService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/dto/Mapper/ScheduledTransferMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/dto/Mapper/ScheduledTransferMapper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/dto/Request/CreateScheduledTransferRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/dto/Request/CreateScheduledTransferRequest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/dto/Request/UpdateScheduledTransferRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/dto/Request/UpdateScheduledTransferRequest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/dto/Response/ScheduledTransferResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/dto/Response/ScheduledTransferResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/entity/ScheduledTransfer.java" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/entity/ScheduledTransfer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/scheduler/ScheduledTransferSchedulerJob.java" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/scheduler/ScheduledTransferSchedulerJob.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/service/ScheduledTransferService.java" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/service/ScheduledTransferService.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -62,61 +61,61 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="9.997508269183067E-6" />
-      <entry key="MS500" value="0.09999501604159407" />
-      <entry key="S2" value="0.5623343183449542" />
-      <entry key="S5" value="0.7943242757366067" />
-      <entry key="S10" value="0.8912487171023623" />
-      <entry key="S30" value="0.9623498269925838" />
-      <entry key="S60" value="0.9809943054630778" />
-      <entry key="M2" value="0.9905233727397488" />
-      <entry key="M5" value="1.1638342997749382" />
-      <entry key="M10" value="3.238807175435599" />
-      <entry key="M15" value="6.3366697565008785" />
-      <entry key="M30" value="14.189284900857086" />
-      <entry key="H1" value="28.45954721680218" />
-      <entry key="H2" value="65.75267960279987" />
-      <entry key="H4" value="126.74638167458819" />
-      <entry key="D1" value="312.7755957809241" />
-      <entry key="W1" value="434.4539060057205" />
-    </decayedCancelled>
-    <decayedSelected>
       <entry key="MS100" value="1.0" />
       <entry key="MS500" value="1.0" />
       <entry key="S2" value="1.0" />
       <entry key="S5" value="1.0" />
       <entry key="S10" value="1.0" />
-      <entry key="S30" value="1.000000000000004" />
-      <entry key="S60" value="1.0000001058657981" />
-      <entry key="M2" value="1.0005564269473044" />
-      <entry key="M5" value="1.0961735845908516" />
-      <entry key="M10" value="1.5449189017687366" />
-      <entry key="M15" value="2.022737799591501" />
-      <entry key="M30" value="3.3993765583940165" />
-      <entry key="H1" value="6.6805274514866095" />
-      <entry key="H2" value="13.919532602437503" />
-      <entry key="H4" value="23.662732436492945" />
-      <entry key="D1" value="52.61408858563463" />
-      <entry key="W1" value="72.25796528952758" />
+      <entry key="S30" value="1.0" />
+      <entry key="S60" value="1.0000000000032117" />
+      <entry key="M2" value="1.000015463256024" />
+      <entry key="M5" value="1.1587638262153697" />
+      <entry key="M10" value="4.484173937540993" />
+      <entry key="M15" value="10.93861815136137" />
+      <entry key="M30" value="31.02083025187014" />
+      <entry key="H1" value="59.30427357035756" />
+      <entry key="H2" value="104.16578347752105" />
+      <entry key="H4" value="171.98741322011628" />
+      <entry key="D1" value="377.5381269071385" />
+      <entry key="W1" value="508.28432230335704" />
+    </decayedCancelled>
+    <decayedSelected>
+      <entry key="MS100" value="0.0" />
+      <entry key="MS500" value="0.0" />
+      <entry key="S2" value="0.0" />
+      <entry key="S5" value="6.340648462890105E-236" />
+      <entry key="S10" value="2.5180644278671835E-118" />
+      <entry key="S30" value="6.314742018146584E-40" />
+      <entry key="S60" value="2.5129153099889866E-20" />
+      <entry key="M2" value="1.5860997223619702E-10" />
+      <entry key="M5" value="1.317998431949063E-4" />
+      <entry key="M10" value="0.01694039245546255" />
+      <entry key="M15" value="0.099835449451706" />
+      <entry key="M30" value="0.7552171937063649" />
+      <entry key="H1" value="3.148814304664861" />
+      <entry key="H2" value="9.55636658216955" />
+      <entry key="H4" value="19.6064500465538" />
+      <entry key="D1" value="50.99071057191827" />
+      <entry key="W1" value="71.93517447663102" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.1794281333446215E-5" />
-      <entry key="MS500" value="0.14625652008075568" />
-      <entry key="S2" value="1.022446874653072" />
-      <entry key="S5" value="1.527070215298669" />
-      <entry key="S10" value="1.7471962691334038" />
-      <entry key="S30" value="1.9118084297333626" />
-      <entry key="S60" value="1.955394322700467" />
-      <entry key="M2" value="1.9781929482955185" />
-      <entry key="M5" value="2.2545634829806875" />
-      <entry key="M10" value="4.78020571702752" />
-      <entry key="M15" value="8.35636351486944" />
-      <entry key="M30" value="17.585826003945474" />
-      <entry key="H1" value="35.13594821005509" />
-      <entry key="H2" value="79.66601186505162" />
-      <entry key="H4" value="150.40291357323667" />
-      <entry key="D1" value="365.38697172938356" />
-      <entry key="W1" value="506.7113127794317" />
+      <entry key="MS100" value="0.2871745887492588" />
+      <entry key="MS500" value="0.7791645796604998" />
+      <entry key="S2" value="0.9395227492140118" />
+      <entry key="S5" value="0.9753554615276419" />
+      <entry key="S10" value="0.9876008614453725" />
+      <entry key="S30" value="0.9958497530944581" />
+      <entry key="S60" value="0.9979227190022614" />
+      <entry key="M2" value="0.9989762810004648" />
+      <entry key="M5" value="1.1584715639750935" />
+      <entry key="M10" value="4.500786696916287" />
+      <entry key="M15" value="11.038014769171482" />
+      <entry key="M30" value="31.775140225031745" />
+      <entry key="H1" value="62.450935061811045" />
+      <entry key="H2" value="113.71776417921772" />
+      <entry key="H4" value="191.5886534917178" />
+      <entry key="D1" value="428.52619532968606" />
+      <entry key="W1" value="580.2189388412622" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
