@@ -230,12 +230,6 @@ public class TransactionService {
                 transactionRepository
                         .findByInitiatorAccountNumber(
                                 accountNumber);
-        Transaction first = transactions.get(0);
-        System.out.println(
-                "ref=" + first.getTransactionReference()
-                        + ", status=" + first.getStatus()
-                        + ", amount=" + first.getAmountMinorUnits()
-        );
         return transactionMapper.toResponseList(transactions);
     }
 }

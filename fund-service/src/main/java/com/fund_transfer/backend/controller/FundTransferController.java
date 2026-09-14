@@ -33,7 +33,7 @@ public class FundTransferController {
 
         return ResponseEntity.ok(response);
     }
-//    @PreAuthorize("@permissionService.hasPermission(authentication, 'transfer:view')")
+   @PreAuthorize("@permissionService.hasPermission(authentication, 'transfer:view')")
     @PostMapping("/history")
     public List<TransactionResponse> getTransations(@RequestBody TransactionHistoryRequest req){
         return transactionService.getHistoryForAccount(req.accountNumber());
