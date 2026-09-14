@@ -1,5 +1,6 @@
 package com.fund_transfer.backend.controller;
 
+import com.fund_transfer.backend.dto.Request.TransactionHistoryRequest;
 import com.fund_transfer.backend.dto.Request.TransferRequest;
 import com.fund_transfer.backend.dto.Response.TransactionResponse;
 
@@ -9,6 +10,8 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/fund-transfer")
@@ -22,5 +25,9 @@ public class FundTransferController {
 
         TransactionResponse response = transactionService.processTransfer(request, idempotencyKey);
         return ResponseEntity.ok(response);
+    }
+    @PostMapping("/history")
+    public List<TransactionResponse> getTransations(@RequestBody TransactionHistoryRequest req){
+        return transactionService.getHistoryForAccount(req.accountNumber());
     }
 }

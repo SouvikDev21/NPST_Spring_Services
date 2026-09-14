@@ -2,6 +2,7 @@ package com.fund_transfer.backend.service;
 
 import com.fund_transfer.backend.Cbs.CbsClient;
 import com.fund_transfer.backend.Npci.NpciClient;
+import com.fund_transfer.backend.dto.Mapper.TransactionMapper;
 import com.fund_transfer.backend.dto.Request.TransferRequest;
 import com.fund_transfer.backend.dto.Response.TransactionResponse;
 import com.fund_transfer.backend.entity.Transaction;
@@ -11,14 +12,18 @@ import com.fund_transfer.backend.exception.CbsReversalException;
 import com.fund_transfer.backend.exception.InsufficientBalanceException;
 import com.fund_transfer.backend.repository.TransactionRepo;
 import com.fund_transfer.backend.utils.MoneyUtil;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -30,6 +35,8 @@ public class TransactionService {
     private final CbsClient cbsClient;
     private final NpciClient npciClient;
     private final TransactionRepo transactionRepository;
+    private final TransactionMapper transactionMapper;
+
 
     public TransactionResponse processTransfer(TransferRequest request, String idempotencyKey) {
 
@@ -212,5 +219,23 @@ public class TransactionService {
                 .failureReason(txn.getFailureReason())
                 .completedAt(txn.getUpdatedAt() != null ? txn.getUpdatedAt() : OffsetDateTime.now(ZoneOffset.UTC))
                 .build();
+    }
+    public List<TransactionResponse>    getHistoryForAccount(String accountNumber) {
+
+        if (accountNumber == null || accountNumber.isBlank()) {
+            throw new IllegalArgumentException("accountNumber is required");
+        }
+
+        List<Transaction> transactions =
+                transactionRepository
+                        .findByInitiatorAccountNumber(
+                                accountNumber);
+        Transaction first = transactions.get(0);
+        System.out.println(
+                "ref=" + first.getTransactionReference()
+                        + ", status=" + first.getStatus()
+                        + ", amount=" + first.getAmountMinorUnits()
+        );
+        return transactionMapper.toResponseList(transactions);
     }
 }
