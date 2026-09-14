@@ -5,11 +5,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="fc54abec-f6cd-49fa-8c4b-1ba8fde20984" name="Changes" comment="Merge remote-tracking branch 'origin/feat/fund_transfer' into feat/fund_transfer&#10;&#10;# Conflicts:&#10;#&#9;fund-service/src/main/resources/application.properties">
+      <change afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/config/RolePermissionMapper.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/dto/Request/UpdateBeneficiaryRequest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/security/KeycloakRoleConverter.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/Npci/MockNpciClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/Npci/MockNpciClient.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/config/PermissionService.java" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/config/PermissionService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/config/SecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/controller/BeneficiaryController.java" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/controller/BeneficiaryController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/controller/FundTransferController.java" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/controller/FundTransferController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/dto/Mapper/TransactionMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/dto/Mapper/TransactionMapper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/repository/TransactionRepo.java" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/repository/TransactionRepo.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/service/TransactionService.java" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/service/TransactionService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/controller/ScheduledTransferController.java" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/controller/ScheduledTransferController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/security/AuthenticatedUserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/security/AuthenticatedUserService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/service/BeneficiaryService.java" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/service/BeneficiaryService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fund-service/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/src/main/resources/application.properties" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -19,10 +27,10 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Record" />
         <option value="Enum" />
         <option value="Interface" />
         <option value="Class" />
+        <option value="Record" />
       </list>
     </option>
   </component>
@@ -57,61 +65,61 @@
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="0.0" />
-      <entry key="MS500" value="0.0" />
-      <entry key="S2" value="8.033649330217355E-97" />
-      <entry key="S5" value="5.424305083983386E-39" />
-      <entry key="S10" value="1.0381644602695196E-19" />
-      <entry key="S30" value="7.473240360573095E-7" />
-      <entry key="S60" value="0.0013366374632012405" />
-      <entry key="M2" value="0.0834036851516074" />
-      <entry key="M5" value="1.835122252613055" />
-      <entry key="M10" value="7.043735404305416" />
-      <entry key="M15" value="12.54585562833932" />
-      <entry key="M30" value="29.41077758705933" />
-      <entry key="H1" value="59.581475128889316" />
-      <entry key="H2" value="108.8562513244156" />
-      <entry key="H4" value="182.57484187930825" />
-      <entry key="D1" value="406.10970640852275" />
-      <entry key="W1" value="545.2827493507342" />
+      <entry key="MS100" value="1.1248158132468495" />
+      <entry key="MS500" value="3.3548255108167098" />
+      <entry key="S2" value="8.97167283876935" />
+      <entry key="S5" value="16.15415212679744" />
+      <entry key="S10" value="22.658352150343745" />
+      <entry key="S30" value="31.06283192853492" />
+      <entry key="S60" value="34.4279811745598" />
+      <entry key="M2" value="36.52798084741594" />
+      <entry key="M5" value="38.87394026811367" />
+      <entry key="M10" value="43.467289252502894" />
+      <entry key="M15" value="48.62840719686885" />
+      <entry key="M30" value="65.06131873588095" />
+      <entry key="H1" value="95.18999464137548" />
+      <entry key="H2" value="144.7526827729291" />
+      <entry key="H4" value="218.96930866726794" />
+      <entry key="D1" value="444.1427272364989" />
+      <entry key="W1" value="584.0972671725791" />
     </decayedCancelled>
     <decayedSelected>
-      <entry key="MS100" value="1.0" />
-      <entry key="MS500" value="1.0" />
-      <entry key="S2" value="1.0" />
-      <entry key="S5" value="1.0" />
-      <entry key="S10" value="1.0" />
-      <entry key="S30" value="1.0000012709169637" />
-      <entry key="S60" value="1.0020645776626063" />
-      <entry key="M2" value="1.1141359226370393" />
-      <entry key="M5" value="3.249628538071154" />
-      <entry key="M10" value="8.182541916318279" />
-      <entry key="M15" value="11.791428828715755" />
-      <entry key="M30" value="17.55537804352112" />
-      <entry key="H1" value="22.855957429476536" />
-      <entry key="H2" value="30.409385051051817" />
-      <entry key="H4" value="41.41317597917811" />
-      <entry key="D1" value="75.43159824571144" />
-      <entry key="W1" value="97.63081786605102" />
+      <entry key="MS100" value="1.2258830483523126E-225" />
+      <entry key="MS500" value="1.041575132302896E-45" />
+      <entry key="S2" value="5.8899060256670824E-12" />
+      <entry key="S5" value="4.0224233558482457E-5" />
+      <entry key="S10" value="0.008545615461750389" />
+      <entry key="S30" value="0.32180032917649265" />
+      <entry key="S60" value="0.8325041394194814" />
+      <entry key="M2" value="1.4657737072622399" />
+      <entry key="M5" value="3.3045438645495055" />
+      <entry key="M10" value="7.637414034149484" />
+      <entry key="M15" value="11.269122657412089" />
+      <entry key="M30" value="17.603994392701726" />
+      <entry key="H1" value="23.559470936779046" />
+      <entry key="H2" value="31.539871832451592" />
+      <entry key="H4" value="42.819700270425244" />
+      <entry key="D1" value="77.25142096289396" />
+      <entry key="W1" value="99.59752306334684" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="0.0029399350535372405" />
-      <entry key="MS500" value="0.31165029856877435" />
-      <entry key="S2" value="0.7471656315645724" />
-      <entry key="S5" value="0.8899523511078948" />
-      <entry key="S10" value="0.9433728590053324" />
-      <entry key="S30" value="0.9807582973044843" />
-      <entry key="S60" value="0.9936781805640663" />
-      <entry key="M2" value="1.1911025905332506" />
-      <entry key="M5" value="5.069638837122402" />
-      <entry key="M10" value="15.204066317637476" />
-      <entry key="M15" value="24.3152944478891" />
-      <entry key="M30" value="46.94939060058971" />
-      <entry key="H1" value="82.42612123549692" />
-      <entry key="H2" value="139.2567946087501" />
-      <entry key="H4" value="223.9805951060187" />
-      <entry key="D1" value="481.53821249419786" />
-      <entry key="W1" value="642.9129366437174" />
+      <entry key="MS100" value="1.0933080090271932" />
+      <entry key="MS500" value="3.3319912628877213" />
+      <entry key="S2" value="8.95439689175945" />
+      <entry key="S5" value="16.140768936703516" />
+      <entry key="S10" value="22.654300057202615" />
+      <entry key="S30" value="31.3431790554731" />
+      <entry key="S60" value="35.21023554404048" />
+      <entry key="M2" value="37.953168736426555" />
+      <entry key="M5" value="42.150044251502166" />
+      <entry key="M10" value="51.07750369911173" />
+      <entry key="M15" value="59.87216820085749" />
+      <entry key="M30" value="82.64630308837802" />
+      <entry key="H1" value="118.73672363406502" />
+      <entry key="H2" value="176.28292458858598" />
+      <entry key="H4" value="261.78117085238904" />
+      <entry key="D1" value="521.3909763689124" />
+      <entry key="W1" value="683.6941474406511" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -195,8 +203,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-30f59d01ecdd-34e2839f716b-intellij.indexing.shared.core-IU-262.9437.185" />
-        <option value="bundled-js-predefined-d6986cc7102b-4abd2a77f808-JavaScript-IU-262.9437.185" />
+        <option value="bundled-jdk-30f59d01ecdd-a203e0a19954-intellij.indexing.shared.core-IU-262.10315.125" />
+        <option value="bundled-js-predefined-d6986cc7102b-4abd2a77f808-JavaScript-IU-262.10315.125" />
       </set>
     </attachedChunks>
   </component>

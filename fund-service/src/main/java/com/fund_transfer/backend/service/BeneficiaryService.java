@@ -3,6 +3,7 @@ package com.fund_transfer.backend.service;
 import com.fund_transfer.backend.dto.Mapper.BeneficiaryMapper;
 import com.fund_transfer.backend.dto.Request.CreateBeneficiaryRequest;
 //import com.fund_transfer.backend.dto.Request.UpdateBeneficiaryRequest;
+import com.fund_transfer.backend.dto.Request.UpdateBeneficiaryRequest;
 import com.fund_transfer.backend.dto.Response.BeneficiaryResponse;
 import com.fund_transfer.backend.entity.Beneficiary;
 import com.fund_transfer.backend.enums.BeneficiaryStatus;
@@ -83,12 +84,12 @@ public class BeneficiaryService {
         return beneficiaryMapper.toResponse(requireOwned(ownerCif, beneficiaryId));
     }
 
-//    @Transactional
-//    public BeneficiaryResponse rename(String ownerCif, Long beneficiaryId, UpdateBeneficiaryRequest request) {
-//        Beneficiary beneficiary = requireOwned(ownerCif, beneficiaryId);
-//        beneficiary.setNickname(request.nickname());
-//        return beneficiaryMapper.toResponse(beneficiary);
-//    }
+    @Transactional
+    public BeneficiaryResponse rename(String ownerCif, Long beneficiaryId, UpdateBeneficiaryRequest request) {
+        Beneficiary beneficiary = requireOwned(ownerCif, beneficiaryId);
+        beneficiary.setNickname(request.nickname());
+        return beneficiaryMapper.toResponse(beneficiary);
+    }
 
     // Soft delete — DELETED is a status value on this entity, not a row removal.
     @Transactional

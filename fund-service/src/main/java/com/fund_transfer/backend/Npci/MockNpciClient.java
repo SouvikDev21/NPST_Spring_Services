@@ -10,7 +10,7 @@ import java.math.BigInteger;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Component
-@Profile({"local", "dev", "test"})
+
 public class MockNpciClient implements NpciClient {
 
     // Tune this to control how often the mock simulates an NPCI failure,
