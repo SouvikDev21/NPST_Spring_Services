@@ -89,8 +89,8 @@ public class TransactionService {
         // comparison boundary via MoneyUtil; never compare the two in
         // different units directly.
         // -----------------------------------------------------------
-        // BigDecimal availableBalance = cbsClient.getAvailableBalance(request.initiatorAccountNumber());
-        BigDecimal availableBalance = BigDecimal.valueOf(1_000_000_000L); // rupees
+        BigDecimal availableBalance = cbsClient.getAvailableBalance(request.initiatorAccountNumber());
+//        BigDecimal availableBalance = BigDecimal.valueOf(1_000_000_000L); // rupees
 
         BigDecimal transferAmountRupees = MoneyUtil.paiseToRupees(request.amountMinorUnits());
 
@@ -113,11 +113,11 @@ public class TransactionService {
         // -----------------------------------------------------------
         String debitReference;
         try {
-            debitReference = "SUCCESS";
-            // debitReference = cbsClient.debit(
-            //         request.initiatorAccountNumber(),
-            //         request.amountMinorUnits(),
-            //         idempotencyKey);
+            debitReference="asffjbja-123-ffgg";
+//             debitReference = cbsClient.debit(
+//                     request.initiatorAccountNumber(),
+//                     request.amountMinorUnits(),
+//                     idempotencyKey);
             log.info("[{}] Step 2 complete: CBS debit succeeded, reference={}", transactionReference, debitReference);
         } catch (CbsDebitException e) {
             log.warn("[{}] Step 2 failed: CBS debit rejected — {}", transactionReference, e.getMessage());

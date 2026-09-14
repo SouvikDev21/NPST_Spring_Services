@@ -1,7 +1,7 @@
 package com.fund_transfer.backend.controller;
 
 import com.fund_transfer.backend.dto.Request.CreateBeneficiaryRequest;
-import com.fund_transfer.backend.dto.Request.UpdateBeneficiaryRequest;
+//import com.fund_transfer.backend.dto.Request.UpdateBeneficiaryRequest;
 import com.fund_transfer.backend.dto.Response.BeneficiaryResponse;
 import com.fund_transfer.backend.exception.BeneficiaryNotFoundException;
 import com.fund_transfer.backend.exception.DuplicateBeneficiaryException;
@@ -53,12 +53,12 @@ public class BeneficiaryController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<BeneficiaryResponse> rename(
-            @AuthenticationPrincipal Jwt jwt,
-            @PathVariable Long id,
-            @Valid @RequestBody UpdateBeneficiaryRequest request) {
-        return ResponseEntity.ok(beneficiaryService.rename(jwt.getClaimAsString("cif"), id, request));
-    }
+//    public ResponseEntity<BeneficiaryResponse> rename(
+//            @AuthenticationPrincipal Jwt jwt,
+//            @PathVariable Long id,
+//            @Valid @RequestBody UpdateBeneficiaryRequest request) {
+//        return ResponseEntity.ok(beneficiaryService.rename(jwt.getClaimAsString("cif"), id, request));
+//    }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(
