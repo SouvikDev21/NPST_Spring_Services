@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+
 @Service
 public class ScheduledTransferService {
 
@@ -32,37 +33,31 @@ public class ScheduledTransferService {
             AuthenticatedUser user,
             CreateScheduledTransferRequest request) {
 
-        validateDates(
-                request.nextExecutionDate(),
-                request.endDate()
-        );
+        validateDates(request.nextExecutionDate(), request.endDate());
 
         ScheduledTransfer scheduledTransfer =
                 ScheduledTransfer.builder()
                         .cif(user.cif())
                         .keycloakUserId(user.keycloakUserId())
+                        .initiatorAccountNumber(request.initiatorAccountNumber())
                         .beneficiaryId(request.beneficiaryId())
                         .amountMinorUnits(request.amountMinorUnits())
                         .transferMode(request.transferMode())
                         .frequency(request.frequency())
-                        .nextExecutionDate(
-                                request.nextExecutionDate())
+                        .nextExecutionDate(request.nextExecutionDate())
                         .endDate(request.endDate())
                         .status(ScheduleStatus.ACTIVE)
                         .retryCount(0L)
                         .maxRetries(3L)
                         .build();
 
-        ScheduledTransfer saved =
-                scheduledTransferRepo.save(scheduledTransfer);
+        ScheduledTransfer saved = scheduledTransferRepo.save(scheduledTransfer);
 
         return scheduledTransferMapper.toResponse(saved);
     }
 
     @Transactional(readOnly = true)
-    public List<ScheduledTransferResponse> getAll(
-            String cif) {
-
+    public List<ScheduledTransferResponse> getAll(String cif) {
         return scheduledTransferRepo
                 .findByCifOrderByNextExecutionDateAsc(cif)
                 .stream()
@@ -71,16 +66,9 @@ public class ScheduledTransferService {
     }
 
     @Transactional(readOnly = true)
-    public ScheduledTransferResponse getById(
-            Long id,
-            String cif) {
-
-        ScheduledTransfer scheduledTransfer =
-                findCustomerSchedule(id, cif);
-
-        return scheduledTransferMapper.toResponse(
-                scheduledTransfer
-        );
+    public ScheduledTransferResponse getById(Long id, String cif) {
+        ScheduledTransfer scheduledTransfer = findCustomerSchedule(id, cif);
+        return scheduledTransferMapper.toResponse(scheduledTransfer);
     }
 
     @Transactional
@@ -89,74 +77,40 @@ public class ScheduledTransferService {
             String cif,
             UpdateScheduledTransferRequest request) {
 
-        ScheduledTransfer scheduledTransfer =
-                findCustomerSchedule(id, cif);
+        ScheduledTransfer scheduledTransfer = findCustomerSchedule(id, cif);
 
-        if (scheduledTransfer.getStatus()
-                != ScheduleStatus.ACTIVE) {
-
+        if (scheduledTransfer.getStatus() != ScheduleStatus.ACTIVE) {
             throw new IllegalStateException(
-                    "Only ACTIVE scheduled transfers can be updated"
-            );
+                    "Only ACTIVE scheduled transfers can be updated");
         }
 
-        validateDates(
-                request.nextExecutionDate(),
-                request.endDate()
-        );
+        validateDates(request.nextExecutionDate(), request.endDate());
 
-        scheduledTransfer.setBeneficiaryId(
-                request.beneficiaryId()
-        );
+        scheduledTransfer.setBeneficiaryId(request.beneficiaryId());
+        scheduledTransfer.setAmountMinorUnits(request.amountMinorUnits());
+        scheduledTransfer.setTransferMode(request.transferMode());
+        scheduledTransfer.setFrequency(request.frequency());
+        scheduledTransfer.setNextExecutionDate(request.nextExecutionDate());
+        scheduledTransfer.setEndDate(request.endDate());
 
-        scheduledTransfer.setAmountMinorUnits(
-                request.amountMinorUnits()
-        );
-
-        scheduledTransfer.setTransferMode(
-                request.transferMode()
-        );
-
-        scheduledTransfer.setFrequency(
-                request.frequency()
-        );
-
-        scheduledTransfer.setNextExecutionDate(
-                request.nextExecutionDate()
-        );
-
-        scheduledTransfer.setEndDate(
-                request.endDate()
-        );
-
-        ScheduledTransfer updated =
-                scheduledTransferRepo.save(scheduledTransfer);
+        ScheduledTransfer updated = scheduledTransferRepo.save(scheduledTransfer);
 
         return scheduledTransferMapper.toResponse(updated);
     }
 
     @Transactional
-    public ScheduledTransferResponse cancel(
-            Long id,
-            String cif) {
+    public ScheduledTransferResponse cancel(Long id, String cif) {
 
-        ScheduledTransfer scheduledTransfer =
-                findCustomerSchedule(id, cif);
+        ScheduledTransfer scheduledTransfer = findCustomerSchedule(id, cif);
 
-        if (scheduledTransfer.getStatus()
-                == ScheduleStatus.COMPLETED) {
-
+        if (scheduledTransfer.getStatus() == ScheduleStatus.COMPLETED) {
             throw new IllegalStateException(
-                    "Completed scheduled transfer cannot be cancelled"
-            );
+                    "Completed scheduled transfer cannot be cancelled");
         }
 
-        scheduledTransfer.setStatus(
-                ScheduleStatus.CANCELLED
-        );
+        scheduledTransfer.setStatus(ScheduleStatus.CANCELLED);
 
-        ScheduledTransfer saved =
-                scheduledTransferRepo.save(scheduledTransfer);
+        ScheduledTransfer saved = scheduledTransferRepo.save(scheduledTransfer);
 
         return scheduledTransferMapper.toResponse(saved);
     }
@@ -167,45 +121,31 @@ public class ScheduledTransferService {
             String cif,
             ScheduleStatus status) {
 
-        ScheduledTransfer scheduledTransfer =
-                findCustomerSchedule(id, cif);
+        ScheduledTransfer scheduledTransfer = findCustomerSchedule(id, cif);
 
         if (status == ScheduleStatus.CANCELLED) {
             throw new IllegalArgumentException(
-                    "Use the cancel endpoint to cancel a schedule"
-            );
+                    "Use the cancel endpoint to cancel a schedule");
         }
 
         scheduledTransfer.setStatus(status);
 
-        ScheduledTransfer saved =
-                scheduledTransferRepo.save(scheduledTransfer);
+        ScheduledTransfer saved = scheduledTransferRepo.save(scheduledTransfer);
 
         return scheduledTransferMapper.toResponse(saved);
     }
 
-    private ScheduledTransfer findCustomerSchedule(
-            Long id,
-            String cif) {
-
+    private ScheduledTransfer findCustomerSchedule(Long id, String cif) {
         return scheduledTransferRepo
                 .findByIdAndCif(id, cif)
-                .orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "Scheduled transfer not found"
-                        ));
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Scheduled transfer not found"));
     }
 
-    private void validateDates(
-            LocalDate nextExecutionDate,
-            LocalDate endDate) {
-
-        if (endDate != null &&
-                endDate.isBefore(nextExecutionDate)) {
-
+    private void validateDates(LocalDate nextExecutionDate, LocalDate endDate) {
+        if (endDate != null && endDate.isBefore(nextExecutionDate)) {
             throw new IllegalArgumentException(
-                    "End date cannot be before next execution date"
-            );
+                    "End date cannot be before next execution date");
         }
     }
 }

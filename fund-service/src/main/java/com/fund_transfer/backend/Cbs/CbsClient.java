@@ -25,7 +25,7 @@ public interface CbsClient {
      *         responsible for querying debit status rather than assuming
      *         failure — see TransactionService.
      */
-    String debit( String ownerAccountNumber, BigDecimal amount, String idempotencyKey);
+    String debit( String ownerAccountNumber, BigInteger amount, String idempotencyKey);
 
     /**
      * Step 5 — compensating transaction: credit the amount back to the owner

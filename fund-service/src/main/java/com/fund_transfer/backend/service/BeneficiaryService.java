@@ -2,6 +2,7 @@ package com.fund_transfer.backend.service;
 
 import com.fund_transfer.backend.dto.Mapper.BeneficiaryMapper;
 import com.fund_transfer.backend.dto.Request.CreateBeneficiaryRequest;
+//import com.fund_transfer.backend.dto.Request.UpdateBeneficiaryRequest;
 import com.fund_transfer.backend.dto.Request.UpdateBeneficiaryRequest;
 import com.fund_transfer.backend.dto.Response.BeneficiaryResponse;
 import com.fund_transfer.backend.entity.Beneficiary;
