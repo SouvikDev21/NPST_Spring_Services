@@ -1,2 +1,0 @@
-package com.term_deposit.common.enums;
-public enum DepositStatus { REQUESTED, PENDING_APPROVAL, APPROVED, ACTIVE, MATURITY_DUE, MATURED, PREMATURE_CLOSED, CLOSED, REJECTED }
