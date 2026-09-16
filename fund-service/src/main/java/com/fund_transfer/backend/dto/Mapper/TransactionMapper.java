@@ -4,6 +4,8 @@ import com.fund_transfer.backend.dto.Response.TransactionResponse;
 import com.fund_transfer.backend.entity.Transaction;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 public class TransactionMapper {
 
@@ -20,5 +22,11 @@ public class TransactionMapper {
                 .failureReason(transaction.getFailureReason())
                 .completedAt(transaction.getUpdatedAt())
                 .build();
+    }
+
+    public List<TransactionResponse> toResponseList(List<Transaction> transactions) {
+        return transactions.stream()
+                .map(this::toResponse)
+                .toList();
     }
 }

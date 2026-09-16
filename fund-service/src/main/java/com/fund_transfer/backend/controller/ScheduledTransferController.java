@@ -9,6 +9,7 @@ import com.fund_transfer.backend.security.AuthenticatedUserService;
 import com.fund_transfer.backend.service.ScheduledTransferService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,8 +32,8 @@ public class ScheduledTransferController {
         this.authenticatedUserService =
                 authenticatedUserService;
     }
-
     @PostMapping
+    @PreAuthorize("@permissionService.hasPermission(authentication, 'schedule:create')")
     public ResponseEntity<ScheduledTransferResponse> create(
             Authentication authentication,
             @Valid @RequestBody
@@ -51,6 +52,7 @@ public class ScheduledTransferController {
     }
 
     @GetMapping
+    @PreAuthorize("@permissionService.hasPermission(authentication, 'schedule:view')")
     public ResponseEntity<List<ScheduledTransferResponse>> getAll(
             Authentication authentication) {
 
@@ -64,8 +66,8 @@ public class ScheduledTransferController {
                 )
         );
     }
-
     @GetMapping("/{id}")
+    @PreAuthorize("@permissionService.hasPermission(authentication, 'schedule:view')")
     public ResponseEntity<ScheduledTransferResponse> getById(
             @PathVariable Long id,
             Authentication authentication) {
@@ -83,6 +85,7 @@ public class ScheduledTransferController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("@permissionService.hasPermission(authentication, 'schedule:create')")
     public ResponseEntity<ScheduledTransferResponse> update(
             @PathVariable Long id,
             Authentication authentication,
@@ -103,6 +106,7 @@ public class ScheduledTransferController {
     }
 
     @PatchMapping("/{id}/cancel")
+    @PreAuthorize("@permissionService.hasPermission(authentication, 'schedule:create')")
     public ResponseEntity<ScheduledTransferResponse> cancel(
             @PathVariable Long id,
             Authentication authentication) {
@@ -120,6 +124,7 @@ public class ScheduledTransferController {
     }
 
     @PatchMapping("/{id}/status")
+    @PreAuthorize("@permissionService.hasPermission(authentication, 'schedule:create')")
     public ResponseEntity<ScheduledTransferResponse> changeStatus(
             @PathVariable Long id,
             @RequestParam ScheduleStatus status,

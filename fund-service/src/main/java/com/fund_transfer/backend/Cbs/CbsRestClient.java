@@ -45,15 +45,15 @@ public class CbsRestClient implements CbsClient {
 
             log.info("CBS raw response: {}", rawResponse.toPrettyString());
 
-            JsonNode accountNode = rawResponse.path("account");
+            JsonNode accountNode = rawResponse.path("Account");
 
-            if (accountNode.isMissingNode() || accountNode.path("availableBalance").isMissingNode()) {
+            if (accountNode.isMissingNode() || accountNode.path("AvailableBalance").isMissingNode()) {
                 throw new CbsDebitException("CBS returned an empty balance response for account " + ownerAccountNumber);
             }
 
-            String accountNumber = accountNode.path("accountId").asText();
-            BigDecimal availableBalance = accountNode.path("availableBalance").decimalValue();
-            String currency = accountNode.path("currency").asText();
+            String accountNumber = accountNode.path("AccountNumber").asText();
+            BigDecimal availableBalance = accountNode.path("AvailableBalance").decimalValue();
+            String currency = accountNode.path("Currency").asText();
 
             CbsBalanceResponse response = new CbsBalanceResponse(accountNumber, availableBalance, currency);
 
@@ -77,7 +77,7 @@ public class CbsRestClient implements CbsClient {
     }
 
     @Override
-    public String debit(String ownerAccountNumber, BigDecimal amount, String idempotencyKey) {
+    public String debit(String ownerAccountNumber, BigInteger amount, String idempotencyKey) {
         // Plain records don't have @Builder — call the canonical constructor
         // directly, in the order fields were declared.
         CbsDebitRequest requestBody = new CbsDebitRequest( ownerAccountNumber, amount, idempotencyKey);
