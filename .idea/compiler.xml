@@ -9,6 +9,7 @@
         <processorPath useClasspath="false">
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.46/lombok-1.18.46.jar" />
         </processorPath>
+        <module name="fund-service" />
         <module name="backend" />
       </profile>
       <profile name="Annotation profile for backend (1)" enabled="true">
@@ -37,6 +38,8 @@
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="backend" options="-parameters" />
       <module name="backend (1)" options="-parameters" />
+      <module name="backend (2)" options="-parameters" />
+      <module name="fund-service" options="-parameters" />
       <module name="loan-service" options="-parameters" />
       <module name="term-deposit-service" options="-parameters" />
     </option>

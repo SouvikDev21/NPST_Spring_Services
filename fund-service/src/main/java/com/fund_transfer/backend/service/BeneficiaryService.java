@@ -1,10 +1,12 @@
 package com.fund_transfer.backend.service;
 
+import com.fund_transfer.backend.Otp.OtpClient;
 import com.fund_transfer.backend.dto.Mapper.BeneficiaryMapper;
 import com.fund_transfer.backend.dto.Request.CreateBeneficiaryRequest;
 //import com.fund_transfer.backend.dto.Request.UpdateBeneficiaryRequest;
 import com.fund_transfer.backend.dto.Request.UpdateBeneficiaryRequest;
 import com.fund_transfer.backend.dto.Response.BeneficiaryResponse;
+import com.fund_transfer.backend.dto.Response.OtpSendResponse;
 import com.fund_transfer.backend.entity.Beneficiary;
 import com.fund_transfer.backend.enums.BeneficiaryStatus;
 import com.fund_transfer.backend.exception.BeneficiaryNotFoundException;
@@ -12,33 +14,68 @@ import com.fund_transfer.backend.exception.DuplicateBeneficiaryException;
 import com.fund_transfer.backend.ifsc.IfscDetailsResponse;
 import com.fund_transfer.backend.ifsc.IfscLookupService;
 import com.fund_transfer.backend.repository.BeneficiaryRepo;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Service
 public class BeneficiaryService {
 
+    // 24-hour cooling period from the moment a beneficiary is added, per
+    // product requirement — the beneficiary cannot be used for a transfer
+    // until coolingPeriodEndsAt has passed.
+    private static final long COOLING_PERIOD_HOURS = 24;
+
     private final BeneficiaryRepo beneficiaryRepo;
     private final IfscLookupService ifscLookupService;
     private final BeneficiaryMapper beneficiaryMapper;
+    private final OtpClient otpClient;
+    private final String addBeneficiaryOtpPurpose;
 
     public BeneficiaryService(BeneficiaryRepo beneficiaryRepo,
                               IfscLookupService ifscLookupService,
-                              BeneficiaryMapper beneficiaryMapper) {
+                              BeneficiaryMapper beneficiaryMapper,
+                              OtpClient otpClient,
+                              @Value("${otp.add-beneficiary-purpose:ADD_BENEFICIARY}") String addBeneficiaryOtpPurpose) {
         this.beneficiaryRepo = beneficiaryRepo;
         this.ifscLookupService = ifscLookupService;
         this.beneficiaryMapper = beneficiaryMapper;
+        this.otpClient = otpClient;
+        this.addBeneficiaryOtpPurpose = addBeneficiaryOtpPurpose;
     }
 
     /**
-     * ownerCif and ownerKeycloakUserId are passed in explicitly by the controller,
-     * resolved from the authenticated security principal — never taken from the
-     * request body (see CreateBeneficiaryRequest's IDOR-fix comment).
+     * Step 1 of the add-beneficiary flow: send an OTP to the customer's
+     * registered mobile number. The frontend calls this first, shows an
+     * OTP-entry screen, then calls create() with the returned otp_reference
+     * plus whatever code the customer typed in.
+     *
+     * amount is intentionally not passed through here — it's only meaningful
+     * for money-movement OTP purposes (e.g. LOGIN/TRANSFER in the sample),
+     * not for adding a beneficiary.
+     */
+    public OtpSendResponse.OtpSendData sendAddBeneficiaryOtp(String ownerCif, String mobileNumber) {
+        return otpClient.sendOtp(ownerCif, mobileNumber, addBeneficiaryOtpPurpose, null);
+    }
+
+    /**
+     * ownerCif and ownerKeycloakUserId are passed in explicitly by the controller
+     * (ownerCif from the X-CIF header, ownerKeycloakUserId from the validated
+     * Keycloak token's subject claim) — never taken from the request body.
      */
     @Transactional
     public BeneficiaryResponse create(String ownerCif, String ownerKeycloakUserId, CreateBeneficiaryRequest request) {
+
+        // OTP must be verified BEFORE any duplicate check / IFSC lookup / persistence —
+        // fail fast on an unverified customer rather than doing other work first.
+        // otpClient.verifyOtp throws OtpVerificationException (mapped to a 4xx by
+        // GlobalExceptionHandler) on a wrong code, expired reference, or mismatched cif.
+        otpClient.verifyOtp(request.otpReference(), request.otpCode(), ownerCif);
+
         if (beneficiaryRepo.existsByOwnerCifAndBeneficiaryAccountNumberAndBeneficiaryIfscCode(
                 ownerCif, request.beneficiaryAccountNumber(), request.beneficiaryIfscCode())) {
             throw new DuplicateBeneficiaryException(request.beneficiaryAccountNumber(), request.beneficiaryIfscCode());
@@ -52,6 +89,8 @@ public class BeneficiaryService {
         // product wants "save now, resolve bank name later" instead.
         IfscDetailsResponse ifscDetails = ifscLookupService.lookup(request.beneficiaryIfscCode());
 
+        Instant now = Instant.now();
+
         Beneficiary beneficiary = Beneficiary.builder()
                 .ownerCif(ownerCif)
                 .ownerKeycloakUserId(ownerKeycloakUserId)
@@ -63,25 +102,32 @@ public class BeneficiaryService {
                 .transferMode(request.transferMode())
                 .type(request.type())
                 .status(BeneficiaryStatus.PENDING_COOLING_PERIOD)
-                // coolingPeriodEndsAt intentionally left null here — set by the OTP
-                // confirmation step (next build step), once the bank-configurable
-                // cooling-off duration is applied.
+                // Cooling period starts now, at creation time (OTP has already been
+                // verified above) — 24 hours per product requirement. A beneficiary
+                // stays PENDING_COOLING_PERIOD until this instant passes; see
+                // requireOwned()/listForCustomer() below, which flip the status to
+                // ACTIVE lazily once it's read after expiry.
+                .coolingPeriodEndsAt(now.plus(COOLING_PERIOD_HOURS, ChronoUnit.HOURS))
                 .build();
 
         beneficiary = beneficiaryRepo.save(beneficiary);
         return beneficiaryMapper.toResponse(beneficiary);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<BeneficiaryResponse> listForCustomer(String ownerCif) {
-        return beneficiaryRepo.findByOwnerCifAndStatusNot(ownerCif, BeneficiaryStatus.DELETED).stream()
+        List<Beneficiary> beneficiaries = beneficiaryRepo.findByOwnerCifAndStatusNot(ownerCif, BeneficiaryStatus.DELETED);
+        beneficiaries.forEach(this::promoteIfCoolingPeriodElapsed);
+        return beneficiaries.stream()
                 .map(beneficiaryMapper::toResponse)
                 .toList();
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public BeneficiaryResponse getOne(String ownerCif, Long beneficiaryId) {
-        return beneficiaryMapper.toResponse(requireOwned(ownerCif, beneficiaryId));
+        Beneficiary beneficiary = requireOwned(ownerCif, beneficiaryId);
+        promoteIfCoolingPeriodElapsed(beneficiary);
+        return beneficiaryMapper.toResponse(beneficiary);
     }
 
     @Transactional
@@ -101,5 +147,17 @@ public class BeneficiaryService {
     private Beneficiary requireOwned(String ownerCif, Long beneficiaryId) {
         return beneficiaryRepo.findByIdAndOwnerCif(beneficiaryId, ownerCif)
                 .orElseThrow(() -> new BeneficiaryNotFoundException(beneficiaryId));
+    }
+
+    // Lazily flips PENDING_COOLING_PERIOD -> ACTIVE once coolingPeriodEndsAt has
+    // passed. Called from read paths within an already-@Transactional method, so
+    // the change is persisted via Hibernate dirty checking — no explicit save()
+    // needed. BLOCKED/DELETED/ACTIVE beneficiaries are left untouched.
+    private void promoteIfCoolingPeriodElapsed(Beneficiary beneficiary) {
+        if (beneficiary.getStatus() == BeneficiaryStatus.PENDING_COOLING_PERIOD
+                && beneficiary.getCoolingPeriodEndsAt() != null
+                && !beneficiary.getCoolingPeriodEndsAt().isAfter(Instant.now())) {
+            beneficiary.setStatus(BeneficiaryStatus.ACTIVE);
+        }
     }
 }
