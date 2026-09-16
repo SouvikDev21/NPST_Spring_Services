@@ -3,20 +3,10 @@ package com.fund_transfer.backend.entity;
 import com.fund_transfer.backend.enums.ScheduleFrequency;
 import com.fund_transfer.backend.enums.ScheduleStatus;
 import com.fund_transfer.backend.enums.TransferMode;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Index;
-import jakarta.persistence.Table;
-import jakarta.persistence.Version;
+import jakarta.persistence.*;
 import java.math.BigInteger;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -52,6 +42,9 @@ public class ScheduledTransfer {
     @Column(name = "keycloak_user_id", nullable = false)
     private String keycloakUserId;
 
+    @Column(name = "initiator_account_number", nullable = false, length = 34)
+    private String initiatorAccountNumber; // owner's account debited on each execution — feeds TransferRequest.initiatorAccountNumber
+
     @Column(name = "beneficiary_id", nullable = false)
     private Long beneficiaryId;
 
@@ -76,8 +69,9 @@ public class ScheduledTransfer {
     @Column(nullable = false, length = 20)
     private ScheduleStatus status;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "last_execution_status", length = 20)
-    private ScheduleStatus lastExecutionStatus; // deliberately a plain string, not TransactionStatus — see schema doc's open item #5
+    private ScheduleStatus lastExecutionStatus; // see scheduler note: TransactionStatus is richer, mapped down on write
 
     @Column(name = "last_executed_at")
     private Instant lastExecutedAt;
@@ -89,9 +83,6 @@ public class ScheduledTransfer {
     @Column(name = "max_retries", nullable = false)
     @Builder.Default
     private Long maxRetries = 3L;
-
-//    @Column(name = "bank_code", nullable = false, length = 20)
-//    private String bankCode;
 
     @Version
     private Long version; // ScheduledTransferSchedulerJob writes here on every execution attempt

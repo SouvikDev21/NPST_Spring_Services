@@ -45,24 +45,6 @@ public class CbsClientConfig {
             builder.defaultHeader(cbsProperties.getApiKeyHeaderName(), cbsProperties.getApiKey());
         }
 
-        // Option B: OAuth2 client-credentials — RestClient doesn't have a
-        // built-in OAuth2 filter like WebClient's ServerOAuth2AuthorizedClientExchangeFilterFunction.
-        // Simplest approach: fetch/cache a token yourself (e.g. a small
-        // CbsTokenProvider bean using RestClient against cbs.oauth-token-url),
-        // then add it as a request interceptor here:
-        //   builder.requestInterceptor((request, body, execution) -> {
-        //       request.getHeaders().setBearerAuth(tokenProvider.getToken());
-        //       return execution.execute(request, body);
-        //   });
-
-        // Option C: mTLS — configure the underlying Apache HttpClient's
-        // SSLContext with your keystore/truststore instead of a header, e.g.
-        // HttpClients.custom().setConnectionManager(
-        //     PoolingHttpClientConnectionManagerBuilder.create()
-        //         .setSSLSocketFactory(SSLConnectionSocketFactoryBuilder.create()
-        //             .setSslContext(yourSslContext).build())
-        //         .build())
-
         return builder.build();
     }
 }

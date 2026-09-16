@@ -1,18 +1,12 @@
 package com.fund_transfer.backend.config;
 
-import org.springframework.beans.factory.ObjectProvider;
+import com.fund_transfer.backend.security.KeycloakRoleConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.convert.converter.Converter;
-import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
@@ -46,7 +40,7 @@ import java.util.stream.Collectors;
  */
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity(prePostEnabled = true) // required for PermissionService's @PreAuthorize checks
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final ObjectProvider<MockAuthFilter> mockAuthFilterProvider;
@@ -56,31 +50,52 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(
+            HttpSecurity http) throws Exception {
+
+        JwtAuthenticationConverter jwtAuthenticationConverter =
+                new JwtAuthenticationConverter();
+
+        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(
+                new KeycloakRoleConverter()
+        );
 
         http
+                .csrf(csrf -> csrf.disable())
+
                 .authorizeHttpRequests(auth -> auth
-                        // H2 console — local/dev debugging only. Remove this exclusion
-                        // (and disable the H2 console entirely) before any shared/prod deploy.
-                        .requestMatchers("/h2-console/**").permitAll()
-                        // Reference-data lookup, not customer data — left open. Tighten if that changes.
-                        .requestMatchers("/api/v1/ifsc/**").permitAll()
-                        // Everything else, including all /api/v1/beneficiaries/** endpoints,
-                        // requires a valid Keycloak access token.
                         .anyRequest().authenticated()
                 )
-                .csrf(csrf -> csrf.disable())
-                .headers(headers -> headers
-                        .frameOptions(frame -> frame.sameOrigin())
+
+                .exceptionHandling(exception -> exception
+
+                        .authenticationEntryPoint(
+                                (request, response, ex) -> {
+                                    response.setStatus(401);
+                                    response.setContentType("application/json");
+                                    response.getWriter().write(
+                                            "{\"error\":\"UNAUTHORIZED\"}"
+                                    );
+                                }
+                        )
+
+                        .accessDeniedHandler(
+                                (request, response, ex) -> {
+                                    response.setStatus(403);
+                                    response.setContentType("application/json");
+                                    response.getWriter().write(
+                                            "{\"error\":\"FORBIDDEN\"}"
+                                    );
+                                }
+                        )
                 )
+
                 .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(jwt -> jwt.jwtAuthenticationConverter(keycloakJwtAuthenticationConverter()))
-                )
-                .exceptionHandling(ex -> ex
-                        // Missing/invalid/expired token.
-                        .authenticationEntryPoint(new HttpStatusEntryPoint(org.springframework.http.HttpStatus.UNAUTHORIZED))
-                        // Valid token, but @PreAuthorize/PermissionService denies the role.
-                        .accessDeniedHandler(jsonAccessDeniedHandler())
+                        .jwt(jwt -> jwt
+                                .jwtAuthenticationConverter(
+                                        jwtAuthenticationConverter
+                                )
+                        )
                 );
 
         // LOCAL/DEV ONLY: if app.security.mock-auth-enabled=true, MockAuthFilter exists

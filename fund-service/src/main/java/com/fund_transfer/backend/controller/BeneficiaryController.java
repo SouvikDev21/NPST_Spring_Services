@@ -51,15 +51,32 @@ public class BeneficiaryController {
             @AuthenticationPrincipal Jwt jwt,
             @RequestHeader(CIF_HEADER) String cif,
             @Valid @RequestBody CreateBeneficiaryRequest request) {
+
+        String ownerCif = jwt.getClaimAsString("cif");
         String ownerKeycloakUserId = jwt.getSubject();
-        BeneficiaryResponse response = beneficiaryService.create(cif, ownerKeycloakUserId, request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+
+        BeneficiaryResponse response =
+                beneficiaryService.create(
+                        ownerCif,
+                        ownerKeycloakUserId,
+                        request
+                );
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(response);
     }
 
     @GetMapping
     @PreAuthorize("@permissionService.hasPermission(authentication, 'beneficiary:view')")
-    public ResponseEntity<List<BeneficiaryResponse>> list(@RequestHeader(CIF_HEADER) String cif) {
-        return ResponseEntity.ok(beneficiaryService.listForCustomer(cif));
+    public ResponseEntity<List<BeneficiaryResponse>> list(
+            @AuthenticationPrincipal Jwt jwt) {
+
+        return ResponseEntity.ok(
+                beneficiaryService.listForCustomer(
+                        jwt.getClaimAsString("cif")
+                )
+        );
     }
 
     @GetMapping("/{id}")
@@ -67,13 +84,16 @@ public class BeneficiaryController {
     public ResponseEntity<BeneficiaryResponse> getOne(
             @RequestHeader(CIF_HEADER) String cif,
             @PathVariable Long id) {
-        return ResponseEntity.ok(beneficiaryService.getOne(cif, id));
+
+        return ResponseEntity.ok(
+                beneficiaryService.getOne(
+                        jwt.getClaimAsString("cif"),
+                        id
+                )
+        );
     }
 
-    // Mutating-but-not-creating action, mapped onto beneficiary:create per
-    // PermissionService's own documented convention (no separate
-    // beneficiary:update permission is defined yet).
-    @PatchMapping("/{id}")
+     @PatchMapping("/{id}")
     @PreAuthorize("@permissionService.hasPermission(authentication, 'beneficiary:create')")
     public ResponseEntity<BeneficiaryResponse> rename(
             @RequestHeader(CIF_HEADER) String cif,
@@ -87,7 +107,12 @@ public class BeneficiaryController {
     public ResponseEntity<Void> delete(
             @RequestHeader(CIF_HEADER) String cif,
             @PathVariable Long id) {
-        beneficiaryService.delete(cif, id);
+
+        beneficiaryService.delete(
+                jwt.getClaimAsString("cif"),
+                id
+        );
+
         return ResponseEntity.noContent().build();
     }
 

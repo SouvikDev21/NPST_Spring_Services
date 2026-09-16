@@ -4,16 +4,14 @@ package com.fund_transfer.backend.exceptionHandler;
 import com.fund_transfer.backend.exception.CbsDebitException;
 import com.fund_transfer.backend.exception.CbsReversalException;
 import com.fund_transfer.backend.exception.InsufficientBalanceException;
-import com.fund_transfer.backend.exception.OtpSendException;
-import com.fund_transfer.backend.exception.OtpVerificationException;
-import exceptionHandler.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.MissingRequestHeaderException;
+
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 

@@ -5,7 +5,6 @@ import com.fund_transfer.backend.enums.TransferMode;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-
 import java.math.BigInteger;
 import java.time.LocalDate;
 

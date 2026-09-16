@@ -2,6 +2,7 @@ package com.fund_transfer.backend.Cbs;
 
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 
 public interface CbsClient {
 
@@ -24,7 +25,7 @@ public interface CbsClient {
      *         responsible for querying debit status rather than assuming
      *         failure — see TransactionService.
      */
-    String debit( String ownerAccountNumber, BigDecimal amount, String idempotencyKey);
+    String debit( String ownerAccountNumber, BigInteger amount, String idempotencyKey);
 
     /**
      * Step 5 — compensating transaction: credit the amount back to the owner
@@ -36,5 +37,5 @@ public interface CbsClient {
      *         reversal itself cannot be confirmed — this must escalate to
      *         manual reconciliation, never fail silently.
      */
-    void reverseDebit(String debitReference, BigDecimal amount, String idempotencyKey);
+    void reverseDebit(String debitReference, BigInteger amount, String idempotencyKey);
 }
