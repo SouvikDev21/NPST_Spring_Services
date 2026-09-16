@@ -1,12 +1,11 @@
 package com.fund_transfer.backend.ifsc;
 
+import feign.FeignException;
+import feign.RetryableException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.regex.Pattern;
 
@@ -16,12 +15,11 @@ public class IfscLookupService {
     private static final Logger log = LoggerFactory.getLogger(IfscLookupService.class);
 
     private static final Pattern IFSC_PATTERN = Pattern.compile("^[A-Z]{4}0[A-Z0-9]{6}$");
-    private static final String RAZORPAY_IFSC_BASE_URL = "https://ifsc.razorpay.com/";
 
-    private final RestTemplate restTemplate;
+    private final IfscFeignClient ifscFeignClient;
 
-    public IfscLookupService(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
+    public IfscLookupService(IfscFeignClient ifscFeignClient) {
+        this.ifscFeignClient = ifscFeignClient;
     }
 
     @Cacheable(value = "ifscDetails", key = "#ifscCode")
@@ -29,10 +27,7 @@ public class IfscLookupService {
         String normalized = normalizeAndValidate(ifscCode);
 
         try {
-            IfscDetailsResponse response = restTemplate.getForObject(
-                    RAZORPAY_IFSC_BASE_URL + normalized,
-                    IfscDetailsResponse.class
-            );
+            IfscDetailsResponse response = ifscFeignClient.getBranchDetails(normalized);
 
             if (response == null || response.getIfsc() == null) {
                 throw new IfscNotFoundException(normalized);
@@ -40,10 +35,20 @@ public class IfscLookupService {
 
             return response;
 
-        } catch (HttpClientErrorException.NotFound e) {
+        } catch (FeignException.NotFound e) {
             throw new IfscNotFoundException(normalized);
 
-        } catch (RestClientException e) {
+        } catch (RetryableException e) {
+            // Feign's umbrella for connect/read timeouts and connection
+            // failures — the equivalent of the old RestClientException catch
+            // for network-level problems.
+            log.error("IFSC upstream lookup failed (network/timeout) for {}: {}", normalized, e.getMessage());
+            throw new IfscLookupUnavailableException(
+                    "IFSC lookup service is temporarily unavailable. Please try again.", e
+            );
+
+        } catch (FeignException e) {
+            // Any other non-2xx status (not a plain 404) from the upstream service.
             log.error("IFSC upstream lookup failed for {}: {}", normalized, e.getMessage());
             throw new IfscLookupUnavailableException(
                     "IFSC lookup service is temporarily unavailable. Please try again.", e
