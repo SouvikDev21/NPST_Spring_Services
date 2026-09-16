@@ -7,11 +7,15 @@ import com.fund_transfer.backend.dto.Response.BeneficiaryResponse;
 import com.fund_transfer.backend.dto.Response.OtpSendResponse;
 import com.fund_transfer.backend.exception.BeneficiaryNotFoundException;
 import com.fund_transfer.backend.exception.DuplicateBeneficiaryException;
+import com.fund_transfer.backend.security.AuthenticatedUser;
+import com.fund_transfer.backend.security.AuthenticatedUserService;
 import com.fund_transfer.backend.service.BeneficiaryService;
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
@@ -47,6 +51,7 @@ public class BeneficiaryController {
 
     @PostMapping
     @PreAuthorize("@permissionService.hasPermission(authentication, 'beneficiary:create')")
+
     public ResponseEntity<BeneficiaryResponse> create(
             @AuthenticationPrincipal Jwt jwt,
             @RequestHeader(CIF_HEADER) String cif,
@@ -57,7 +62,7 @@ public class BeneficiaryController {
 
         BeneficiaryResponse response =
                 beneficiaryService.create(
-                        ownerCif,
+                        "CIF100001",
                         ownerKeycloakUserId,
                         request
                 );

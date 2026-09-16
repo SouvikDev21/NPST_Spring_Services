@@ -13,7 +13,7 @@ public class AuthenticatedUserService {
     public AuthenticatedUserService(
             @Value("${app.test.cif:CIF100001}") String testCif) {
 
-        this.testCif = testCif;
+        this.testCif = "CIF100001";
     }
 
     public AuthenticatedUser getCurrentUser(

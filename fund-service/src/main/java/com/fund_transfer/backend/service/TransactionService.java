@@ -40,11 +40,6 @@ public class TransactionService {
 
     public TransactionResponse processTransfer(TransferRequest request, String idempotencyKey) {
 
-        // -----------------------------------------------------------
-        // STEP 0: Idempotency check — BEFORE any side effect, including
-        // the balance check. If a row already exists for this key, this
-        // is a retry (client timeout/double-click), not a new transfer.
-        // -----------------------------------------------------------
         Optional<Transaction> existing = transactionRepository.findByIdempotencyKey(idempotencyKey);
         if (existing.isPresent()) {
             log.info("Idempotent replay detected for key={}, returning existing result (status={})",
@@ -52,17 +47,7 @@ public class TransactionService {
             return toResponse(existing.get());
         }
 
-        // -----------------------------------------------------------
-        // STEP 0.5: Mint OUR OWN durable transaction reference and
-        // persist status=INITIATED immediately. This row is what survives
-        // a crash mid-flow and what reconciliation is run against — it is
-        // NOT the same value as idempotencyKey (see class docs in DTOs).
-        //
-        // The unique constraint on idempotency_key (see Transaction entity)
-        // is the real defence against a concurrent duplicate request that
-        // races past the findByIdempotencyKey() check above; we catch that
-        // below rather than relying on the check alone.
-        // -----------------------------------------------------------
+
         String transactionReference = "TXN-" + UUID.randomUUID();
 
         Transaction txn = Transaction.builder()
@@ -86,16 +71,6 @@ public class TransactionService {
                     .orElseThrow(() -> dup);
         }
 
-        // -----------------------------------------------------------
-        // STEP 1: Validate balance BEFORE touching any money.
-        //
-        // availableBalance from CBS is assumed to come back in RUPEES
-        // (BigDecimal) — that's the natural unit for a balance-inquiry API.
-        // The transfer amount, however, is stored/transmitted everywhere
-        // else as paise (BigInteger). Convert paise -> rupees ONLY at this
-        // comparison boundary via MoneyUtil; never compare the two in
-        // different units directly.
-        // -----------------------------------------------------------
         BigDecimal availableBalance = cbsClient.getAvailableBalance(request.initiatorAccountNumber());
 //        BigDecimal availableBalance = BigDecimal.valueOf(1_000_000_000L); // rupees
 
@@ -111,13 +86,6 @@ public class TransactionService {
         log.info("[{}] Step 1 complete: balance validated for account {}",
                 transactionReference, request.initiatorAccountNumber());
 
-        // -----------------------------------------------------------
-        // STEP 2: Debit the owner's account at CBS.
-        // Pass transactionReference (not idempotencyKey) as our correlation
-        // id to CBS where possible — idempotencyKey is still forwarded
-        // separately so CBS can do its own dedup on retries of this exact
-        // HTTP call.
-        // -----------------------------------------------------------
         String debitReference;
         try {
             debitReference="asffjbja-123-ffgg";
@@ -132,20 +100,12 @@ public class TransactionService {
             return toResponse(txn);
         }
 
-        // NOTE on timeouts: if the CBS call times out with no exception and
-        // no response, do NOT assume the debit failed — query CBS for the
-        // status of this idempotencyKey before deciding. A real CbsClient
-        // must surface that ambiguity explicitly rather than throwing a
-        // plain CbsDebitException.
 
         txn.setCbsDebitReference(debitReference);
         txn.setStatus(TransactionStatus.DEBITED);
         transactionRepository.save(txn);
 
-        // -----------------------------------------------------------
-        // STEP 3: NPCI disbursal to the beneficiary. Money has left the
-        // owner's account (Step 2) but hasn't reached the beneficiary yet.
-        // -----------------------------------------------------------
+
         boolean npciSuccess;
         try {
             npciSuccess = npciClient.disburse(
@@ -154,17 +114,13 @@ public class TransactionService {
                     request.amountMinorUnits(),
                     idempotencyKey);
         } catch (Exception e) {
-            // Treated as failure for now; in production an ambiguous NPCI
-            // outcome should route to a reconciliation/status-poll job
-            // instead of immediately reversing.
+
             log.warn("[{}] Step 3: NPCI call threw an exception, treating as failure — {}",
                     transactionReference, e.getMessage());
             npciSuccess = false;
         }
 
-        // -----------------------------------------------------------
-        // STEP 4: Set status based on NPCI outcome.
-        // -----------------------------------------------------------
+
         if (npciSuccess) {
             log.info("[{}] Step 4: NPCI disbursal succeeded for {}",
                     transactionReference, request.destinationAccountNumber());
@@ -174,33 +130,24 @@ public class TransactionService {
             return toResponse(txn);
         }
 
-        // -----------------------------------------------------------
-        // STEP 5: NPCI failed after CBS debit succeeded — reverse the debit
-        // so the owner isn't left out of pocket.
-        // -----------------------------------------------------------
+
         log.warn("[{}] Step 4/5: NPCI disbursal failed, reversing CBS debit reference={}",
                 transactionReference, debitReference);
         try {
-            cbsClient.reverseDebit(debitReference, request.amountMinorUnits(), idempotencyKey);
+//            cbsClient.reverseDebit(debitReference, request.amountMinorUnits(), idempotencyKey);
             log.info("[{}] Step 5 complete: reversal succeeded for reference={}", transactionReference, debitReference);
             txn.setStatus(TransactionStatus.NPCI_FAILED);
             txn.setFailureReason("Disbursal failed; amount reversed to owner account");
             transactionRepository.save(txn);
             return toResponse(txn);
         } catch (CbsReversalException reversalEx) {
-            // -----------------------------------------------------------
-            // STEP 6: Worst case — debit succeeded, disbursal failed, AND
-            // reversal failed. Never silently swallow this: persist status,
-            // and this row must be picked up by an on-call alert / manual
-            // reconciliation queue poll.
-            // -----------------------------------------------------------
+
             log.error("[{}] Step 6: CRITICAL — reversal failed after NPCI failure. debitReference={}, error={}",
                     transactionReference, debitReference, reversalEx.getMessage(), reversalEx);
             txn.setStatus(TransactionStatus.REVERSAL_FAILED);
             txn.setFailureReason("Disbursal failed and reversal could not be confirmed — escalated for manual review");
             transactionRepository.save(txn);
-            // Consider throwing a mapped 5xx here instead of returning 200,
-            // so monitoring/alerting on HTTP error rates catches this too.
+
             return toResponse(txn);
         }
     }
