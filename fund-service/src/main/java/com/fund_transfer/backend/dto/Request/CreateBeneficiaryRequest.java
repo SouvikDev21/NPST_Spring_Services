@@ -8,11 +8,16 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 /**
- * SECURITY FIX: ownerCif and ownerKeycloakUserId were removed from this DTO.
- * They must NEVER be client-suppliable — a client could otherwise create a
- * beneficiary against another customer's CIF (IDOR). The controller resolves
- * both values from the authenticated security principal instead and passes
- * them into the service layer separately from this request body.
+ * SECURITY FIX (kept from original design): ownerCif and ownerKeycloakUserId
+ * are NOT fields on this DTO. The CIF for a create-beneficiary request comes
+ * from the "X-CIF" header (see BeneficiaryController) rather than the body,
+ * and ownerKeycloakUserId always comes from the validated Keycloak access
+ * token's subject claim — never from client input.
+ *
+ * OTP: otpReference/otpCode are required and are verified against the OTP
+ * service (see BeneficiaryService.create) BEFORE the beneficiary is
+ * persisted. otpReference must be the value returned by
+ * POST /api/v1/beneficiaries/otp/send for the SAME cif.
  */
 public record CreateBeneficiaryRequest(
 
@@ -38,7 +43,14 @@ public record CreateBeneficiaryRequest(
         TransferMode transferMode,
 
         @NotNull
-        BeneficiaryType type
+        BeneficiaryType type,
+
+        @NotBlank(message = "otpReference is required — call /api/v1/beneficiaries/otp/send first")
+        String otpReference,
+
+        @NotBlank(message = "otpCode is required")
+        @Pattern(regexp = "^[0-9]{4,8}$", message = "otpCode must be numeric")
+        String otpCode
 
 ) {
 }

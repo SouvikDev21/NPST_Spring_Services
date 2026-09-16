@@ -48,26 +48,66 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.INTERNAL_SERVER_ERROR, "CBS_REVERSAL_UNCONFIRMED", ex.getMessage(), request, null);
     }
 
+    // -----------------------------------------------------------------
+    // OTP was not sent (OTP service unreachable/rejected the send call).
+    // 502 — the failure is upstream (OTP service), not the caller's fault.
+    // -----------------------------------------------------------------
+    @ExceptionHandler(OtpSendException.class)
+    public ResponseEntity<exceptionHandler.ErrorResponse> handleOtpSendException(
+            OtpSendException ex, HttpServletRequest request) {
+        log.warn("OTP send failed at {}: {}", request.getRequestURI(), ex.getMessage());
+        return build(HttpStatus.BAD_GATEWAY, "OTP_SEND_FAILED", ex.getMessage(), request, null);
+    }
 
+    // -----------------------------------------------------------------
+    // OTP verification failed — wrong code, expired reference, mismatched
+    // cif, or the OTP service being unreachable. 401: the caller has not
+    // proven they're the account holder for this action, regardless of
+    // which Keycloak-authenticated user they otherwise are.
+    // -----------------------------------------------------------------
+    @ExceptionHandler(OtpVerificationException.class)
+    public ResponseEntity<exceptionHandler.ErrorResponse> handleOtpVerificationException(
+            OtpVerificationException ex, HttpServletRequest request) {
+        log.warn("OTP verification failed at {}: {}", request.getRequestURI(), ex.getMessage());
+        return build(HttpStatus.UNAUTHORIZED, "OTP_VERIFICATION_FAILED", ex.getMessage(), request, null);
+    }
+
+    // -----------------------------------------------------------------
+    // Required "X-CIF" header missing from a beneficiary-management call.
+    // -----------------------------------------------------------------
+    @ExceptionHandler(MissingRequestHeaderException.class)
+    public ResponseEntity<exceptionHandler.ErrorResponse> handleMissingHeader(
+            MissingRequestHeaderException ex, HttpServletRequest request) {
+        log.warn("Missing required header at {}: {}", request.getRequestURI(), ex.getMessage());
+        return build(HttpStatus.BAD_REQUEST, "MISSING_HEADER",
+                "Required header '" + ex.getHeaderName() + "' is missing", request, null);
+    }
+
+    // -----------------------------------------------------------------
+    // Bean Validation failures — @Valid @RequestBody rejects the request
+    // (e.g. blank ownerCif, amount below @DecimalMin). Collects every
+    // field error instead of just the first, so the client can fix
+    // everything in one round trip.
+    // -----------------------------------------------------------------
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationException(
+    public ResponseEntity<exceptionHandler.ErrorResponse> handleValidationException(
             MethodArgumentNotValidException ex, HttpServletRequest request) {
         List<ErrorResponse.FieldError> fieldErrors = ex.getBindingResult().getFieldErrors().stream()
-                .map(fe -> new ErrorResponse.FieldError(fe.getField(), fe.getDefaultMessage()))
+                .map(fe -> new exceptionHandler.ErrorResponse.FieldError(fe.getField(), fe.getDefaultMessage()))
                 .toList();
         log.warn("Validation failed for request to {}: {}", request.getRequestURI(), fieldErrors);
         return build(HttpStatus.BAD_REQUEST, "VALIDATION_FAILED", "Request validation failed", request, fieldErrors);
     }
 
     @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
-    public ResponseEntity<ErrorResponse> handleUnreadableBody(
+    public ResponseEntity<exceptionHandler.ErrorResponse> handleUnreadableBody(
             org.springframework.http.converter.HttpMessageNotReadableException ex, HttpServletRequest request) {
         log.warn("Malformed request body at {}: {}", request.getRequestURI(), ex.getMessage());
         return build(HttpStatus.BAD_REQUEST, "MALFORMED_REQUEST", "Request body is missing or malformed", request, null);
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public ResponseEntity<ErrorResponse> handleMethodNotSupported(
+    public ResponseEntity<exceptionHandler.ErrorResponse> handleMethodNotSupported(
             HttpRequestMethodNotSupportedException ex, HttpServletRequest request) {
         log.warn("Method not allowed at {}: {}", request.getRequestURI(), ex.getMessage());
         return build(HttpStatus.METHOD_NOT_ALLOWED, "METHOD_NOT_ALLOWED", ex.getMessage(), request, null);
@@ -75,16 +115,16 @@ public class GlobalExceptionHandler {
 
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleUnexpected(Exception ex, HttpServletRequest request) {
+    public ResponseEntity<exceptionHandler.ErrorResponse> handleUnexpected(Exception ex, HttpServletRequest request) {
         log.error("Unhandled exception at {}", request.getRequestURI(), ex);
         return build(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR",
                 "An unexpected error occurred. Please try again or contact support.", request, null);
     }
 
-    private ResponseEntity<ErrorResponse> build(
+    private ResponseEntity<exceptionHandler.ErrorResponse> build(
             HttpStatus status, String errorCode, String message,
-            HttpServletRequest request, List<ErrorResponse.FieldError> fieldErrors) {
-        ErrorResponse body = new ErrorResponse(
+            HttpServletRequest request, List<exceptionHandler.ErrorResponse.FieldError> fieldErrors) {
+        exceptionHandler.ErrorResponse body = new exceptionHandler.ErrorResponse(
                 OffsetDateTime.now(),
                 status.value(),
                 errorCode,

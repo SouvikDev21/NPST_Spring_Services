@@ -1,8 +1,10 @@
 package com.fund_transfer.backend.controller;
 
 import com.fund_transfer.backend.dto.Request.CreateBeneficiaryRequest;
+import com.fund_transfer.backend.dto.Request.SendBeneficiaryOtpRequest;
 import com.fund_transfer.backend.dto.Request.UpdateBeneficiaryRequest;
 import com.fund_transfer.backend.dto.Response.BeneficiaryResponse;
+import com.fund_transfer.backend.dto.Response.OtpSendResponse;
 import com.fund_transfer.backend.exception.BeneficiaryNotFoundException;
 import com.fund_transfer.backend.exception.DuplicateBeneficiaryException;
 import com.fund_transfer.backend.security.AuthenticatedUser;
@@ -20,9 +22,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+
 @RestController
 @RequestMapping("/api/v1/beneficiaries")
 public class BeneficiaryController {
+
+    public static final String CIF_HEADER = "X-CIF";
 
     private final BeneficiaryService beneficiaryService;
 
@@ -30,16 +35,26 @@ public class BeneficiaryController {
         this.beneficiaryService = beneficiaryService;
     }
 
-    // NOTE: assumes Spring Security's resource-server JWT support with Keycloak,
-    // and that the access token carries CIF as a custom claim (e.g. "cif").
-    // Adjust claim names / principal type to match your actual Auth/Identity
-    // Service token shape — this is the wiring point to confirm with Pod C.
+    // ---------------------------------------------------------------
+    // Step 1 of add-beneficiary: send OTP to the customer's mobile.
+    // Frontend calls this, shows an OTP screen, then calls create()
+    // below with the returned otp_reference + whatever code was typed.
+    // ---------------------------------------------------------------
+    @PostMapping("/otp/send")
+    @PreAuthorize("@permissionService.hasPermission(authentication, 'beneficiary:create')")
+    public ResponseEntity<OtpSendResponse.OtpSendData> sendOtp(
+            @RequestHeader(CIF_HEADER) String cif,
+            @Valid @RequestBody SendBeneficiaryOtpRequest request) {
+        OtpSendResponse.OtpSendData data = beneficiaryService.sendAddBeneficiaryOtp(cif, request.mobileNumber());
+        return ResponseEntity.ok(data);
+    }
 
     @PostMapping
     @PreAuthorize("@permissionService.hasPermission(authentication, 'beneficiary:create')")
 
     public ResponseEntity<BeneficiaryResponse> create(
             @AuthenticationPrincipal Jwt jwt,
+            @RequestHeader(CIF_HEADER) String cif,
             @Valid @RequestBody CreateBeneficiaryRequest request) {
 
         String ownerCif = jwt.getClaimAsString("cif");
@@ -72,7 +87,7 @@ public class BeneficiaryController {
     @GetMapping("/{id}")
     @PreAuthorize("@permissionService.hasPermission(authentication, 'beneficiary:view')")
     public ResponseEntity<BeneficiaryResponse> getOne(
-            @AuthenticationPrincipal Jwt jwt,
+            @RequestHeader(CIF_HEADER) String cif,
             @PathVariable Long id) {
 
         return ResponseEntity.ok(
@@ -86,16 +101,16 @@ public class BeneficiaryController {
      @PatchMapping("/{id}")
     @PreAuthorize("@permissionService.hasPermission(authentication, 'beneficiary:create')")
     public ResponseEntity<BeneficiaryResponse> rename(
-            @AuthenticationPrincipal Jwt jwt,
+            @RequestHeader(CIF_HEADER) String cif,
             @PathVariable Long id,
             @Valid @RequestBody UpdateBeneficiaryRequest request) {
-        return ResponseEntity.ok(beneficiaryService.rename(jwt.getClaimAsString("cif"), id, request));
+        return ResponseEntity.ok(beneficiaryService.rename(cif, id, request));
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("@permissionService.hasPermission(authentication, 'beneficiary:create')")
     public ResponseEntity<Void> delete(
-            @AuthenticationPrincipal Jwt jwt,
+            @RequestHeader(CIF_HEADER) String cif,
             @PathVariable Long id) {
 
         beneficiaryService.delete(

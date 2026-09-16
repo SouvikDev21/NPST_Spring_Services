@@ -44,7 +44,7 @@
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/SouvikDev21/NPST_Spring_Services.git&quot;,
-    &quot;accountId&quot;: &quot;e2eb6832-3e55-4fb5-974e-22f9c1d0f03e&quot;
+    &quot;accountId&quot;: &quot;816291b9-b9c6-413f-aff0-4522b34bcbb1&quot;
   }
 }</component>
   <component name="HighlightingSettingsPerFile">
@@ -188,6 +188,20 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="BackendApplication (4)" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" temporary="true" nameIsGenerated="true">
+      <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UnknownPolicyInFreeMode" />
+      <module name="fund-service" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.fund_transfer.backend.BackendApplication" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.fund_transfer.backend.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="BackendApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
       <option name="ALTERNATIVE_JRE_PATH" value="$USER_HOME$/.jdks/openjdk-26.0.2.1" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
@@ -197,6 +211,11 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Spring Boot.BackendApplication (4)" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
