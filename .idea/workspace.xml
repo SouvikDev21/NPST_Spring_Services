@@ -7,8 +7,14 @@
     <list default="true" id="fc54abec-f6cd-49fa-8c4b-1ba8fde20984" name="Changes" comment="Merge remote-tracking branch 'origin/feat/fund_transfer' into feat/fund_transfer&#10;&#10;# Conflicts:&#10;#&#9;fund-service/src/main/resources/application.properties">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/Cbs/CbsClientConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/Cbs/CbsClientConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/Cbs/CbsProperties.java" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/Cbs/CbsProperties.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/Cbs/CbsRestClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/Cbs/CbsRestClient.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/Npci/MockNpciClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/Npci/MockNpciClient.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/config/RolePermissionMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/config/RolePermissionMapper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/controller/BeneficiaryController.java" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/controller/BeneficiaryController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/controller/FundTransferController.java" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/controller/FundTransferController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/exceptionHandler/GlobalExceptionHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/exceptionHandler/GlobalExceptionHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/security/AuthenticatedUserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/security/AuthenticatedUserService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/service/TransactionService.java" beforeDir="false" afterPath="$PROJECT_DIR$/fund-service/src/main/java/com/fund_transfer/backend/service/TransactionService.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -141,7 +147,7 @@
     &quot;Spring Boot.BackendApplication.executor&quot;: &quot;Run&quot;,
     &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
     &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;feat/fund__transfer&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;#29 on feat/fund__transfer&quot;,
     &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
     &quot;last_directory_selection&quot;: &quot;/home/souvik-dey/Desktop/JavaBackend/fund-service/src/test/java&quot;,

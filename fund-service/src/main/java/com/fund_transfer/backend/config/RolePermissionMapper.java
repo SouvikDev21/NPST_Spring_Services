@@ -27,7 +27,12 @@ public class RolePermissionMapper {
 
             "BANK_SUPER_ADMIN",
             Set.of(
-                    "transfer:view"
+                    "transfer:create",
+                    "transfer:view",
+                    "beneficiary:create",
+                    "beneficiary:view",
+                    "schedule:create",
+                    "schedule:view"
             )
     );
 

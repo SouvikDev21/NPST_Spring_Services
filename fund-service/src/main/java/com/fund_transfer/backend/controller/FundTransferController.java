@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/fund-transfer")
+@RequestMapping("/api/fund-transfer/imps")
 @RequiredArgsConstructor
 public class FundTransferController {
     private final TransactionService transactionService;

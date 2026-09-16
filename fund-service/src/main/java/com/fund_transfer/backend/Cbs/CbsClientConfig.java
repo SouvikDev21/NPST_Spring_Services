@@ -18,10 +18,7 @@ public class CbsClientConfig {
 
     @Bean
     public RestClient CbsRestClient() {
-        // RequestConfig carries the connect timeout; "response timeout" here
-        // is the Apache HttpClient 5 equivalent of what we called "read timeout"
-        // when this was WebClient — how long to wait for CBS to respond once
-        // the request has been sent.
+
         RequestConfig requestConfig = RequestConfig.custom()
                 .setConnectTimeout(Timeout.ofMilliseconds(cbsProperties.getConnectTimeoutMs()))
                 .setResponseTimeout(Timeout.ofMilliseconds(cbsProperties.getReadTimeoutMs()))
@@ -38,9 +35,6 @@ public class CbsClientConfig {
                 .baseUrl(cbsProperties.getBaseUrl())
                 .requestFactory(requestFactory);
 
-        // --- Auth wiring: uncomment/adjust whichever matches once confirmed ---
-
-        // Option A: static API key header — current default assumption
         if (cbsProperties.getApiKey() != null && !cbsProperties.getApiKey().isBlank()) {
             builder.defaultHeader(cbsProperties.getApiKeyHeaderName(), cbsProperties.getApiKey());
         }
