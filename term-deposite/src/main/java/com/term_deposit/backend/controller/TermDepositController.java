@@ -7,7 +7,9 @@ import com.term_deposit.backend.dto.Response.TermDepositResponse;
 import com.term_deposit.backend.enums.DepositRequestStatus;
 import com.term_deposit.backend.enums.DepositRequestType;
 import com.term_deposit.backend.entity.DepositRequest;
+import com.term_deposit.backend.entity.TermDepositProduct;
 import com.term_deposit.backend.repository.DepositRequestRepository;
+import com.term_deposit.backend.repository.TermDepositProductRepository;
 import com.term_deposit.backend.service.DepositRequestApprovalService;
 import com.term_deposit.backend.service.TermDepositService;
 import jakarta.validation.Valid;
@@ -16,6 +18,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
+import java.math.BigInteger; // <-- Added this import for minor units math
 import java.util.List;
 import java.util.UUID;
 
@@ -26,8 +31,9 @@ import java.util.UUID;
 public class TermDepositController {
 
     private final DepositRequestApprovalService approvalService;
-    private final DepositRequestRepository depositRequestRepository; // In a production app, this delegates to a MakerService
+    private final DepositRequestRepository depositRequestRepository;
     private final TermDepositService termDepositService;
+    private final TermDepositProductRepository productRepository;
 
     /**
      * MAKER ENDPOINT: Initiates the request.
@@ -40,13 +46,40 @@ public class TermDepositController {
 
         log.info("Received request to open FD for CIF: {}", requestDto.cif());
 
-        // Save as a pending request for the Checker to review
+        // 1. Fetch using the updated Repository method (productCode instead of productId)
+        TermDepositProduct productRules = productRepository.findByProductCode("FD_REGULAR")
+                .orElseThrow(() -> new RuntimeException("Product catalog rules not found for FD_REGULAR"));
+
+        // 2. Dynamic Business Rule Validation: Amount
+        // Convert user's BigDecimal (e.g. 5000.00) to minor units BigInteger (e.g. 500000) for database comparison
+        BigInteger requestedMinorUnits = requestDto.principalAmount().multiply(new BigDecimal("100")).toBigInteger();
+
+        if (requestedMinorUnits.compareTo(productRules.getMinAmountMinorUnits()) < 0 ||
+                requestedMinorUnits.compareTo(productRules.getMaxAmountMinorUnits()) > 0) {
+
+            // Convert back to readable major units for the error message
+            BigDecimal minDisplayAmount = new BigDecimal(productRules.getMinAmountMinorUnits()).divide(new BigDecimal("100"));
+            BigDecimal maxDisplayAmount = new BigDecimal(productRules.getMaxAmountMinorUnits()).divide(new BigDecimal("100"));
+
+            return ResponseEntity.badRequest().body("Error: Principal amount must be between ₹"
+                    + minDisplayAmount + " and ₹" + maxDisplayAmount);
+        }
+
+        // 3. Dynamic Business Rule Validation: Tenure
+        if (requestDto.tenureMonths() < productRules.getMinTenureMonths() ||
+                requestDto.tenureMonths() > productRules.getMaxTenureMonths()) {
+            return ResponseEntity.badRequest().body("Error: Tenure must be between "
+                    + productRules.getMinTenureMonths() + " and " + productRules.getMaxTenureMonths() + " months.");
+        }
+
+        // 4. Save as a pending request for the Checker to review
         DepositRequest pendingRequest = DepositRequest.builder()
                 .cif(requestDto.cif())
                 .makerKeycloakUserId(requestDto.makerUserId())
                 .requestType(DepositRequestType.CREATE_FIXED_DEPOSIT)
                 .status(DepositRequestStatus.UNDER_REVIEW)
-                // We store the raw JSON payload in 'remarks' for now so the Checker has the data
+                .principalAmount(requestDto.principalAmount())
+                .tenureMonths(requestDto.tenureMonths())
                 .remarks("Amount: " + requestDto.principalAmount() + ", Tenure: " + requestDto.tenureMonths())
                 .build();
 
@@ -93,9 +126,11 @@ public class TermDepositController {
         DepositRequest pendingRequest = DepositRequest.builder()
                 .cif(requestDto.cif())
                 .makerKeycloakUserId(requestDto.makerUserId())
-                .requestType(DepositRequestType.PREMATURE_CLOSURE) // Identifies this as a closure!
+                .requestType(DepositRequestType.PREMATURE_CLOSURE)
                 .status(DepositRequestStatus.UNDER_REVIEW)
-                .requestReference(requestDto.depositNumber()) // Store the target FD number here safely
+                .requestReference(requestDto.depositNumber())
+                .principalAmount(BigDecimal.ZERO)
+                .tenureMonths(0)
                 .remarks("Premature closure requested for FD: " + requestDto.depositNumber())
                 .build();
 

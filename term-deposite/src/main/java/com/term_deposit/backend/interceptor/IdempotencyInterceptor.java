@@ -25,12 +25,12 @@ public class IdempotencyInterceptor implements HandlerInterceptor {
 
         String idempotencyKey = request.getHeader("Idempotency-Key");
 
-        if (idempotencyKey == null || idempotencyKey.trim().isEmpty()) {
+        if (idempotencyKey == null || idempotencyKey.trim().isEmpty()) {  //400 Bad request
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing Idempotency-Key header");
             return false;
         }
 
-        if (idempotencyRepository.existsByIdempotencyKey(idempotencyKey)) {
+        if (idempotencyRepository.existsByIdempotencyKey(idempotencyKey)) { //409 Conflict error
             response.sendError(HttpServletResponse.SC_CONFLICT, "Duplicate request detected for Idempotency-Key");
             return false;
         }
@@ -43,6 +43,6 @@ public class IdempotencyInterceptor implements HandlerInterceptor {
 
         idempotencyRepository.save(record);
 
-        return true;
+        return true; // request handed over to controller
     }
 }

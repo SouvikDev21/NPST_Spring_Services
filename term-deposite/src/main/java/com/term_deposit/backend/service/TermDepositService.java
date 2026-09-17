@@ -12,16 +12,18 @@ import com.term_deposit.backend.entity.OutboxEvent;
 import com.term_deposit.backend.entity.TermDeposit;
 import com.term_deposit.backend.repository.OutboxEventRepository;
 import com.term_deposit.backend.repository.TermDepositRepository;
-import com.term_deposit.backend.exception.ResourceNotFoundException; // Added this import
+import com.term_deposit.backend.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant; // Added this import
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.time.Instant;
+import java.time.LocalDate; // <-- Added import for dynamic maturity calculation
 import java.util.stream.Collectors;
 import java.util.List;
-import java.math.BigDecimal;
 
 @Slf4j
 @Service
@@ -39,9 +41,9 @@ public class TermDepositService {
         // 1. Map local request to CBS external format
         CbsOpenTdRequest cbsRequest = new CbsOpenTdRequest(
                 request.getCif(),
-                "FD-REGULAR",
-                new BigDecimal("50000.00"),
-                12,
+                "FD_REGULAR",
+                request.getPrincipalAmount(),
+                request.getTenureMonths(),
                 "SAVINGS-12345",
                 "ON_MATURITY"
         );
@@ -56,8 +58,15 @@ public class TermDepositService {
                 .keycloakUserId(request.getKeycloakUserId())
                 .status(DepositStatus.ACTIVE)
                 .interestRate(cbsResponse.appliedInterestRate())
-                .maturityDate(cbsResponse.maturityDate())
+                // --- FIXED: Dynamically calculate maturity date based on user tenure ---
+                .maturityDate(LocalDate.now().plusMonths(request.getTenureMonths()))
+                // ---------------------------------------------------------------------
                 .cbsReferenceNumber(cbsResponse.cbsReferenceNumber())
+                .principalAmount(request.getPrincipalAmount())
+                .principalMinorUnits(request.getPrincipalAmount().multiply(new BigDecimal("100")).toBigInteger())
+                .activatedAt(Instant.now())
+                .interestEarnedMinorUnits(BigInteger.ZERO)
+                .tenureDays(request.getTenureMonths() * 30)
                 .build();
 
         TermDeposit savedDeposit = termDepositRepository.save(termDeposit);
@@ -88,19 +97,15 @@ public class TermDepositService {
                 .collect(Collectors.toList());
     }
 
-    // --- NEW PREMATURE CLOSURE LOGIC ADDED HERE ---
     @Transactional
     public void closeTermDeposit(String depositNumber) {
         log.info("Executing CBS FD Closure for FD: {}", depositNumber);
 
-        // 1. Fetch the existing active FD
         TermDeposit fd = termDepositRepository.findByDepositNumber(depositNumber)
                 .orElseThrow(() -> new ResourceNotFoundException("Term Deposit not found"));
 
-        // 2. Simulate Penalty Calculation & CBS Update
         log.info("Applying premature withdrawal penalty for FD: {}", depositNumber);
 
-        // 3. Update the database state
         fd.setStatus(DepositStatus.CLOSED);
         fd.setClosedAt(Instant.now());
 

@@ -26,6 +26,7 @@ public class TermDeposit {
     private DepositType depositType;
     private String fundingAccountReference;
     private BigInteger principalMinorUnits;
+    @Column(name = "interest_rate", precision = 5, scale = 2, nullable = false)
     private BigDecimal interestRate;
     private Integer tenureDays;
     private LocalDate startDate;
@@ -57,4 +58,6 @@ public class TermDeposit {
     private Instant createdAt;
     @UpdateTimestamp
     private Instant updatedAt;
+    @Column(name = "principal_amount", precision = 19, scale = 4, nullable = false)
+    private BigDecimal principalAmount;
 }

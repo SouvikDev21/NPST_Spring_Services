@@ -7,6 +7,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
@@ -39,4 +41,8 @@ public class DepositRequest {
     private Instant createdAt;
     @UpdateTimestamp
     private Instant updatedAt;
+    @Column(name = "principal_amount", precision = 19, scale = 4, nullable = false)
+    private BigDecimal principalAmount;
+    @Column(name = "tenure_months", nullable = false)
+    private Integer tenureMonths;
 }

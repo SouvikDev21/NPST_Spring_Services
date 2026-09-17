@@ -1,6 +1,8 @@
 package com.term_deposit.backend.repository;
 
 import com.term_deposit.backend.entity.TermDeposit;
+import com.term_deposit.backend.entity.TermDepositProduct;
+import com.term_deposit.backend.enums.DepositStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -16,4 +18,8 @@ public interface TermDepositRepository extends JpaRepository<TermDeposit, UUID> 
 
     // For your Premature Closure API
     Optional<TermDeposit> findByDepositNumber(String depositNumber);
+
+    List<TermDeposit> findByStatus(DepositStatus status);
+
+    Optional<TermDepositProduct> findByProductId(UUID productId);
 }
